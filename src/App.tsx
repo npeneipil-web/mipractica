@@ -1,0 +1,44 @@
+import { useState } from "react";
+import { EmployeeTable } from "./components/emloy-table";
+import { PresentationLetter } from "./components/presentation-letter";
+import {
+  BrowserRouter as BrouserRouter,
+  Routes as ROUTALOCA,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Home } from "./components/home";
+import { InputFormPage } from "./components/input-form";
+import { PokeApiPage } from "./components/pokeapi-page";
+import { ErrorPage } from "./components/error";
+import { CalculadoraTable } from "./components/examples/calculadora";
+import Gallery from "./components/examples/component";
+import { LoremPicsumPage } from "./components/lorem-picsum";
+
+function App() {
+  return (
+    <BrouserRouter>
+      <ROUTALOCA>
+        <Route
+          path="/"
+          element={
+            <>
+              <Home></Home>
+            </>
+          }
+        />
+        <Route path="/employee" element={<PresentationLetter />} />
+        <Route path="/404" element={<ErrorPage />} />
+        <Route path="/input-form" element={<InputFormPage />} />
+        <Route path="/pokeapi" element={<PokeApiPage />} />
+        <Route path="/calculadora" element={<CalculadoraTable />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/lorempicsum" element={<LoremPicsumPage />} />
+
+        <Route path="*" element={<Navigate to="/404" />} />
+      </ROUTALOCA>
+    </BrouserRouter>
+  );
+}
+
+export default App;
