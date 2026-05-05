@@ -8,6 +8,28 @@ interface PokemonData {
   skills: string[];
 }
 
+// interface Props {
+//   name: string;
+// }
+
+// function PokeApiPage({ name }: Props) {
+
+//   return (
+//     <>
+//       <div></div>
+//       <div></div>
+//     </>
+//   );
+// }
+
+// const PokeApiPAge: React.FC<Props> = ({ name }) => {
+//   return <></>;
+// };
+
+// const PokeApiPAge = ({ name }: Props) => {
+//   return <></>;
+// };
+
 export const PokeApiPage = () => {
   const [searchPokemon, setSearchPokemon] = useState<string>("");
   const [pokemonData, setPokemonData] = useState<PokemonData | null>(null);
