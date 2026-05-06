@@ -1,10 +1,14 @@
 import { useState } from "react";
+
+//una interfaz declara las propiedades con su respectivo tipo de dato
 interface LoremPicsumData {
   width: number;
   height: number;
 }
 
+//crea una funcion
 export const LoremPicsumPage = () => {
+  //crea useState
   const [data, setData] = useState<LoremPicsumData>({
     width: 100,
     height: 100,

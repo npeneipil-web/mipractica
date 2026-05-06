@@ -14,6 +14,8 @@ import { ErrorPage } from "./components/error";
 import { CalculadoraTable } from "./components/examples/calculadora";
 import Gallery from "./components/examples/component";
 import { LoremPicsumPage } from "./components/lorem-picsum";
+import { Presentations } from "./components/practice";
+import { Article } from "./components/exercise-super";
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
         <Route path="/calculadora" element={<CalculadoraTable />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/lorempicsum" element={<LoremPicsumPage />} />
+        <Route path="/practica" element={<Presentations />} />
+        <Route path="/articulos" element={<Article />} />
 
         <Route path="*" element={<Navigate to="/404" />} />
       </ROUTALOCA>

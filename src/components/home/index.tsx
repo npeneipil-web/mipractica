@@ -29,6 +29,10 @@ export const Home = () => {
         Ir a la pagina de ejemplo Calculadora
       </Link>
       <Link to="/lorempicsum">Ir a Lorem</Link>
+      <Link to="/practica"> Ir a Practica </Link>
+      <Link to="/articulos" className="border-2 bg-gray-500">
+        Buscar Articulos de Supermercado
+      </Link>
     </div>
   );
 };

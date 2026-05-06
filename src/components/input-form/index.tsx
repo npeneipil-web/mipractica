@@ -1,5 +1,5 @@
 import { EmployeeTable } from "../emloy-table";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export const InputFormPage = () => {
   const [name, setName] = useState<string>("");
