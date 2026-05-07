@@ -41,6 +41,7 @@ export const PokeApiPage = () => {
     fetch(`https://pokeapi.co/api/v2/pokemon/${searchPokemon.toLowerCase()}`)
       .then((response) => response.json())
       .then((data) => {
+        console.log(data);
         //Transforma los datos de la API en el formato que define la interfaz PokemonData para poder mostrarlos.
         setPokemonData({
           src: data.sprites.front_default,
@@ -99,28 +100,39 @@ export const PokemonTable: React.FC<PokemonData> = ({
   skills,
 }) => {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full max-w-md mb-10">
-      <img src={src} alt={name} className="w-60 h-60 mx-auto mb-4" />
-      <table className="w-full">
-        <tbody>
-          <tr>
-            <td className="font-bold text-[18px]">Nombre</td>
-            <td className="capitalize">{name}</td>
-          </tr>
-          <tr>
-            <td className="font-bold text-[18px]">Altura</td>
-            <td>{height}</td>
-          </tr>
-          <tr>
-            <td className="font-bold text-[18px]">Peso</td>
-            <td>{weight}</td>
-          </tr>
-          <tr>
-            <td className="font-bold text-[18px]">Habilidades</td>
-            <td>{skills.join(", ")}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div className="font-serif bg-red-500 p-6 rounded-xl shadow-sm border border-slate-200 w-full max-w-md mb-10">
+        <div>
+          <div className="w-10 h-10 bg-blue-400 rounded-full"></div>
+          <div className="bg-white w-60 border border-slate-800 mt-3 m-6 ">
+            <img src={src} alt={name} className="w-60 h-60 mx-auto mb-auto" />
+          </div>
+          <div className="bg-gray-600 w-70 rounded-2xl pb-4 pt-1">
+            <div className="bg-lime-300 px-4 mx-1.5  border border-black rounded-full my-4 flex justify-between ">
+              <span className="font-bold text-[18px]">Pokemon</span>
+              <span className=" text-[18px] ">{name}</span>
+              <span>type</span>
+            </div>
+
+            <table className=" mx-auto text-center border border-black  ">
+              <tbody>
+                <tr className="bg-lime-300 ">
+                  <td className="font-bold text-[15px]">Altura</td>
+                  <td>{height}</td>
+                </tr>
+                <tr className="bg-lime-300 ">
+                  <td className="font-bold text-[15px]">Peso</td>
+                  <td>{weight}</td>
+                </tr>
+                <tr className="bg-lime-300 ">
+                  <td className="font-bold text-[15px]">Habilidades</td>
+                  <td>{skills.join(" , ")}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };

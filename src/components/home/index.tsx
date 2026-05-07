@@ -1,38 +1,43 @@
 import { Link } from "react-router-dom";
 
-export const Home = () => {
+export const Home = ({ children }: React.PropsWithChildren) => {
+  const design =
+    "w-35  text-white flex hover:text-black font-bold py-2 px-4 bg-gray-400 hover:bg-gray-100 transform transition hover:translate-1 motion-reduce:hover:transform-none";
+
   return (
-    <div className="min-h-screen bg-slate-50 p-8 flex flex-col items-center font-sans">
-      <Link to="/" className="text-blue-500 hover:text-blue-700">
-        ir a home
-      </Link>
-      <Link
-        to="/employee"
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Ir a la página de empleados
-      </Link>
-      <Link
-        to="/404"
-        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Ir a la página de error
-      </Link>
-      <Link
-        to="/input-form"
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Ir a la página de formulario
-      </Link>
-      <Link to="/pokeApi"> Ir a la pagina de poke api</Link>
-      <Link to="/calculadora" className="bg-yellow-300">
-        Ir a la pagina de ejemplo Calculadora
-      </Link>
-      <Link to="/lorempicsum">Ir a Lorem</Link>
-      <Link to="/practica"> Ir a Practica </Link>
-      <Link to="/articulos" className="border-2 bg-gray-500">
-        Buscar Articulos de Supermercado
-      </Link>
-    </div>
+    <>
+      <div className="min-h-screen bg-slate-50 p-8 flex  font-sans shado">
+        <div className="flex flex-col">
+          <Link to="/" className={design}>
+            Home
+          </Link>
+          <Link to="/employee" className={design}>
+            Empleados
+          </Link>
+          <Link to="/404" className={design}>
+            Error 404
+          </Link>
+          <Link to="/input-form" className={design}>
+            Formulario
+          </Link>
+          <Link to="/pokeApi" className={design}>
+            PokeApi
+          </Link>
+          <Link to="/calculadora" className={design}>
+            Calculadora
+          </Link>
+          <Link to="/lorempicsum" className={design}>
+            Lorem
+          </Link>
+          <Link to="/practica" className={design}>
+            Practica
+          </Link>
+          <Link to="/articulos" className={design}>
+            Supermercado
+          </Link>
+        </div>
+        <div className="flex w-full bg-white justify-center">{children}</div>
+      </div>
+    </>
   );
 };

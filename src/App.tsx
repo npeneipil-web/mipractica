@@ -3,7 +3,7 @@ import { EmployeeTable } from "./components/emloy-table";
 import { PresentationLetter } from "./components/presentation-letter";
 import {
   BrowserRouter as BrouserRouter,
-  Routes as ROUTALOCA,
+  Routes,
   Route,
   Navigate,
 } from "react-router-dom";
@@ -20,27 +20,22 @@ import { Article } from "./components/exercise-super";
 function App() {
   return (
     <BrouserRouter>
-      <ROUTALOCA>
-        <Route
-          path="/"
-          element={
-            <>
-              <Home></Home>
-            </>
-          }
-        />
-        <Route path="/employee" element={<PresentationLetter />} />
-        <Route path="/404" element={<ErrorPage />} />
-        <Route path="/input-form" element={<InputFormPage />} />
-        <Route path="/pokeapi" element={<PokeApiPage />} />
-        <Route path="/calculadora" element={<CalculadoraTable />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/lorempicsum" element={<LoremPicsumPage />} />
-        <Route path="/practica" element={<Presentations />} />
-        <Route path="/articulos" element={<Article />} />
+      <Home>
+        <Routes>
+          <Route path="/" element={<>Bienvenido a mi práctica</>} />
+          <Route path="/employee" element={<PresentationLetter />} />
+          <Route path="/404" element={<ErrorPage />} />
+          <Route path="/input-form" element={<InputFormPage />} />
+          <Route path="/pokeapi" element={<PokeApiPage />} />
+          <Route path="/calculadora" element={<CalculadoraTable />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/lorempicsum" element={<LoremPicsumPage />} />
+          <Route path="/practica" element={<Presentations />} />
+          <Route path="/articulos" element={<Article />} />
 
-        <Route path="*" element={<Navigate to="/404" />} />
-      </ROUTALOCA>
+          <Route path="*" element={<Navigate to="/404" />} />
+        </Routes>
+      </Home>
     </BrouserRouter>
   );
 }
