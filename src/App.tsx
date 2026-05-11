@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { EmployeeTable } from "./components/emloy-table";
 import { PresentationLetter } from "./components/presentation-letter";
+
 import {
   BrowserRouter as BrouserRouter,
   Routes,
@@ -16,6 +17,7 @@ import Gallery from "./components/examples/component";
 import { LoremPicsumPage } from "./components/lorem-picsum";
 import { Presentations } from "./components/practice";
 import { Article } from "./components/exercise-super";
+import { Calculator } from "./components/examples/calculator";
 
 function App() {
   return (
@@ -32,6 +34,7 @@ function App() {
           <Route path="/lorempicsum" element={<LoremPicsumPage />} />
           <Route path="/practica" element={<Presentations />} />
           <Route path="/articulos" element={<Article />} />
+          <Route path="/calculator" element={<Calculator />} />
 
           <Route path="*" element={<Navigate to="/404" />} />
         </Routes>

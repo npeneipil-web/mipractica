@@ -35,6 +35,9 @@ export const Home = ({ children }: React.PropsWithChildren) => {
           <Link to="/articulos" className={design}>
             Supermercado
           </Link>
+          <Link to="/calculator" className={design}>
+            Calculadora 2
+          </Link>
         </div>
         <div className="flex w-full bg-white justify-center">{children}</div>
       </div>
