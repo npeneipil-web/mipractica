@@ -5,8 +5,12 @@ export const Presentations = () => {
   //esto es una funcion
   return (
     <>
-      <User name="Nataly" userName="n44t4ly" />
-      <User name="Juan" userName="juanito123" />
+      <div className="flex flex-col gap-1">
+        <User name="Nataly Soledad" userName="n4t4ly" />
+        <User name="Miguel Durand " userName="midudev" />
+        <User name="Juan Roman" userName="midudev2" />
+        <User name="Juan Roman" userName="robertcalbulyevilao" />
+      </div>
     </>
   );
 };

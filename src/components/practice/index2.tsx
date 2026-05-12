@@ -19,35 +19,28 @@ export const User = ({ userName, name }: userProps) => {
   //esto es una funcion
   return (
     <>
-      <div className="w-full h-full">
-        <article
-          className=" w-75 h-25
-        left-20  relative top-30 "
-        >
-          <header className="bg-gray-200 h-full rounded-md">
-            <img
-              className="w-20 rounded-full relative left-3 top-2"
-              src={url}
-            />
-            <div>
-              <strong className="relative left-29 bottom-15 text-[20px]">
-                {" "}
-                {name}
-              </strong>
-              <span className="relative left-16 text-[12px] bottom-6">
-                {userName}
-              </span>
-            </div>
-          </header>
-          <aside>
-            <button
-              className="bg-white rounded-2xl border-gray-500 relative  p-2 left-50 bottom-17  hover:bg-gray-500 hover:text-white"
-              onClick={handleClick}
-            >
-              {text}
-            </button>
-          </aside>
-        </article>
+      <div className="">
+        <div className="relative top-25">
+          <article className=" w-95 bg-[#252e32] rounded-full items-center ">
+            <header className=" h-full flex px-1.5 py-2">
+              <img className="w-20 rounded-full" src={url} />
+              <div className="flex flex-col justify-center ml-2.5">
+                <strong className=" text-white text-[20px] ">{name}</strong>
+                <span className=" text-[12px]  text-sm text-gray-300 ">
+                  @{userName}
+                </span>
+              </div>
+              <aside className="items-center justify-end flex flex-1 mr-2.5">
+                <button
+                  className="bg-white rounded-full font-semibold border-gray-500 relative  w-20 h-9  hover:bg-gray-500 hover:text-white"
+                  onClick={handleClick}
+                >
+                  {text}
+                </button>
+              </aside>
+            </header>
+          </article>
+        </div>
       </div>
     </>
   );
