@@ -4,7 +4,7 @@ type Cell = Player | null;
 
 
 export const Cat = () => {
-  const button = "h-20 w-20 border text-3xl font-bold"
+  const button = "h-20 w-20 border text-3xl font-bold";
 
   //turno actual 
   const [turn, setTurn] = useState<Player>("X");
@@ -45,7 +45,7 @@ export const Cat = () => {
           <button
             key={index}
             onClick={() => play(index)}
-            className="h-20 w-20 border text-3xl font-bold"
+            className={button}
           >
             {cell}
           </button>
