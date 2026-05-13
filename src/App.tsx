@@ -18,6 +18,7 @@ import { LoremPicsumPage } from "./components/lorem-picsum";
 import { Presentations } from "./components/practice";
 import { Article } from "./components/exercise-super";
 import { Calculator } from "./components/examples/calculator";
+import { Cat } from "./components/cat/index";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/practica" element={<Presentations />} />
           <Route path="/articulos" element={<Article />} />
           <Route path="/calculator" element={<Calculator />} />
+          <Route path="/cat" element={<Cat/>}/>
 
           <Route path="*" element={<Navigate to="/404" />} />
         </Routes>
