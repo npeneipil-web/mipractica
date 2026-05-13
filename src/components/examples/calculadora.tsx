@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export const CalculadoraTable = () => {
   //retorna InputCalPage, componente que se encarga de mostrar el contenido de la calculadora.

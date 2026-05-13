@@ -1,9 +1,4 @@
-import { CalculadoraTable } from "../examples/calculadora";
-import { useState } from "react";
-
 export const InputCalPage: React.FC = () => {
-  const [num, setNum] = useState<number | undefined>();
-
   return (
     <div>
       <table>

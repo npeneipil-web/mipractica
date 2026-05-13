@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Fragment } from "react/jsx-runtime";
 
 export const ErrorPage = () => {
   const navegate = useNavigate();

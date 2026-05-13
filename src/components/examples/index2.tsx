@@ -6,7 +6,11 @@ interface Information {
   age: number;
 }
 //este componente es una tabla que va a recibir por parametro los campos tipo nombre, apellido y edad
-const InformationTable: React.FC<Information> = ({ name, lastName, age }) => {
+export const InformationTable: React.FC<Information> = ({
+  name,
+  lastName,
+  age,
+}) => {
   //si no hay datos para mostrar, es decir, si todos los campos son vacios, se muestra un mensaje indicando que no hay datos para mostrar
   if (!name && !lastName && !age) {
     return <p>No hay datos para mostrar</p>;

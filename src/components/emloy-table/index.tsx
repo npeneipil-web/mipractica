@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 //Definimos una interfaz Employee que describe la estructura de los datos que se van a mostrar en la tabla.
 //  Esta interfaz incluye campos como name, position, description, email y age.
 interface Employee {

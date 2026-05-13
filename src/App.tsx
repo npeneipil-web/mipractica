@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { EmployeeTable } from "./components/emloy-table";
 import { PresentationLetter } from "./components/presentation-letter";
 
 import {
@@ -19,6 +17,7 @@ import { Presentations } from "./components/practice";
 import { Article } from "./components/exercise-super";
 import { Calculator } from "./components/examples/calculator";
 import { Cat } from "./components/cat/index";
+import { Ajedrez } from "./components/ajedrez";
 
 function App() {
   return (
@@ -36,7 +35,8 @@ function App() {
           <Route path="/practica" element={<Presentations />} />
           <Route path="/articulos" element={<Article />} />
           <Route path="/calculator" element={<Calculator />} />
-          <Route path="/cat" element={<Cat/>}/>
+          <Route path="/cat" element={<Cat />} />
+          <Route path="/ajedrez" element={<Ajedrez />} />
 
           <Route path="*" element={<Navigate to="/404" />} />
         </Routes>
