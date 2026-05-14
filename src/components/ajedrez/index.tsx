@@ -1,3 +1,4 @@
+import { Braces, Rose } from "lucide-react";
 import { useState } from "react";
 //crear los tipos de pieza y su color
 type PieceType = "R" | "D" | "T" | "C" | "A" | "P";
@@ -6,7 +7,7 @@ type PieceColor = "white" | "black";
 //estructura asignar valores
 interface Piece {
   type: PieceType;
-  color?: PieceColor;
+  color: PieceColor;
 }
 //casilla
 type Cell = Piece | null;
@@ -29,60 +30,116 @@ const pieceAttribute: Record<string, PieceAttribute> = {
 //tablero por defecto
 const boardDefault: Cell[][] = [
   [
-    { type: "T" },
-    { type: "C" },
-    { type: "A" },
-    { type: "R" },
-    { type: "D" },
-    { type: "A" },
-    { type: "C" },
-    { type: "T" },
+    { type: "T", color: "black" },
+    { type: "C", color: "black" },
+    { type: "A", color: "black" },
+    { type: "R", color: "black" },
+    { type: "D", color: "black" },
+    { type: "A", color: "black" },
+    { type: "C", color: "black" },
+    { type: "T", color: "black" },
   ],
   [
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-  ],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, { type: "R" }, null, null, null, null],
-  [
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
-    { type: "P" },
+    { type: "P", color: "black" },
+    { type: "P", color: "black" },
+    { type: "P", color: "black" },
+    { type: "P", color: "black" },
+    { type: "P", color: "black" },
+    { type: "P", color: "black" },
+    { type: "P", color: "black" },
+    { type: "P", color: "black" },
   ],
   [
-    { type: "T" },
-    { type: "C" },
-    { type: "A" },
-    { type: "R" },
-    { type: "D" },
-    { type: "A" },
-    { type: "C" },
-    { type: "T" },
+    { type: "P", color: "black" },
+    null,
+    null,
+    null,
+    null,
+    { type: "T", color: "white" },
+    null,
+    null,
+  ],
+  [
+    null,
+    null,
+    null,
+    { type: "D", color: "black" },
+    { type: "T", color: "white" },
+    null,
+    null,
+    null,
+  ],
+  [
+    null,
+    null,
+    null,
+    { type: "A", color: "white" },
+    { type: "T", color: "white" },
+    { type: "C", color: "white" },
+    null,
+    null,
+  ],
+  [{ type: "P", color: "white" }, null, null, null, null, null, null, null],
+  [
+    null,
+    { type: "P", color: "white" },
+    { type: "P", color: "white" },
+    { type: "P", color: "white" },
+    { type: "P", color: "white" },
+    { type: "P", color: "white" },
+    { type: "P", color: "white" },
+    { type: "P", color: "white" },
+  ],
+  [
+    { type: "T", color: "white" },
+    { type: "C", color: "white" },
+    { type: "A", color: "white" },
+    { type: "R", color: "white" },
+    { type: "D", color: "white" },
+    { type: "A", color: "white" },
+    { type: "C", color: "white" },
+    { type: "T", color: "white" },
   ],
 ];
 
 export const Ajedrez = () => {
   //tablero
   const [board, setBoard] = useState<Cell[][]>(boardDefault);
+  // guarda las sugerencia
+  const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
+
+  //FUNCIONES
   //funcion para validar limites | sirve para no devolver posiciones fuera del tablero
   const isInsideBoard = (row: number, col: number) => {
     return row >= 0 && row < 8 && col >= 0 && col < 8;
   };
+
+  const isEmptyCell = (row: number, col: number) => {
+    return board[row][col] === null;
+  };
+
+  const isEnemyPiece = (piece: Piece, row: number, col: number) => {
+    const target = board[row][col];
+    return target !== null && target.color !== piece.color;
+  };
+  const isFriendPiece = (piece: Piece, row: number, col: number) => {
+    const target = board[row][col];
+    return target !== null && target.color === piece.color;
+  };
+
+  const isOwnPiece = (piece: Piece, row: number, col: number) => {
+    const target = board[row][col];
+    return (
+      target !== null &&
+      target.color == piece.color &&
+      target.type === piece.type
+    );
+  };
+
+  //VALIDACIONES DE CASILLAS
+
   // funcion rey
-  const moveKing = (row: number, col: number) => {
+  const moveKing = (piece: Piece, row: number, col: number) => {
     const moves = [
       { row: row - 1, col: col - 1 },
       { row: row - 1, col },
@@ -93,21 +150,11 @@ export const Ajedrez = () => {
       { row: row + 1, col },
       { row: row + 1, col: col + 1 },
     ];
-    const isBusy = moves.filter((move) => {
-      const cell = board[move.row][move.col];
-      return cell !== null;
-    });
-    return moves.filter(
-      (move) =>
-        isInsideBoard(move.row, move.col) &&
-        //some busca cualquier elemento que coincida con esa condicion
-        !isBusy.some((b) => {
-          return b.row == move.row && b.col == move.col;
-        }),
-    );
+    //return moves.filter((move) => {if(!isInsideBoard(move.row, move.col))});
+    return [];
   };
   //funcion del caballo
-  const moveHorse = (row: number, col: number): Move[] => {
+  const moveHorse = (piece: Piece, row: number, col: number): Move[] => {
     const moves = [
       { row: row - 2, col: col - 1 },
       { row: row - 2, col: col + 1 },
@@ -118,30 +165,252 @@ export const Ajedrez = () => {
       { row: row + 2, col: col - 1 },
       { row: row + 2, col: col + 1 },
     ];
-    //funcion que evalua si hay casillas ocupadas
-    const isBusy = moves.filter((move) => {
-      const cell = board[move.row][move.col];
-      return cell !== null;
+
+    return moves.filter((move) => {
+      if (!isInsideBoard(move.row, move.col)) return false;
+
+      if (isFriendPiece(piece, move.row, move.col)) return false;
+
+      return true;
     });
-    console.log(isBusy);
-    return moves.filter(
-      (move) =>
-        isInsideBoard(move.row, move.col) &&
-        //some busca cualquier elemento que coincida con esa condicion
-        !isBusy.some((b) => {
-          return b.row == move.row && b.col == move.col;
-        }),
-    );
   };
 
   //funcion reina|dama
-  const moveQueen = () => {};
+  const moveQueen = (row: number, col: number) => {
+    const moves = [];
+    for (let i = 1; i < 8; i++) {
+      if (isInsideBoard(row - i, col - i)) {
+        moves.push({ row: row - i, col: col - i });
+      }
+
+      if (isInsideBoard(row - i, col + i)) {
+        moves.push({ row: row - i, col: col + i });
+      }
+
+      if (isInsideBoard(row + i, col - i)) {
+        moves.push({ row: row + i, col: col - i });
+      }
+
+      if (isInsideBoard(row + i, col + i)) {
+        moves.push({ row: row + i, col: col + i });
+      }
+      if (isInsideBoard(row + i, col)) {
+        moves.push({ row: row + i, col });
+      }
+      if (isInsideBoard(row - i, col)) {
+        moves.push({ row: row - i, col });
+      }
+      if (isInsideBoard(row, col + i)) {
+        moves.push({ row, col: col + i });
+      }
+      if (isInsideBoard(row, col - i)) {
+        moves.push({ row, col: col - i });
+      }
+    }
+    return moves;
+  };
   //funcion torre
-  const moveTower = () => {};
+  const moveTower = (piece: Piece, row: number, col: number): Move[] => {
+    const moves: Move[] = [];
+
+    let isUpBreak = false;
+    let isDownBreak = false;
+    let isLeftBreak = false;
+    let isRightBreak = false;
+    for (let i = row - 1; i >= 0; i--) {
+      const isEmpty = isEmptyCell(i, col);
+      const isEnemy = isEnemyPiece(piece, i, col);
+      const isFriend = isFriendPiece(piece, i, col);
+
+      if (isEmpty) {
+        moves.push({ row: i, col });
+      }
+      if (isEnemy && !isUpBreak) {
+        moves.push({ row: i, col });
+        isUpBreak = true;
+        break;
+      }
+
+      const distance = Math.abs(i - row);
+
+      if (isFriend && distance === 1) {
+        break;
+      }
+
+      if (isFriend && !isUpBreak && distance > 1) {
+        moves.push({ row: i + 1, col });
+        isUpBreak = true;
+        break;
+      }
+    }
+
+    for (let i = row + 1; i < 8; i++) {
+      const isEmpty = isEmptyCell(i, col);
+      const isEnemy = isEnemyPiece(piece, i, col);
+      const isFriend = isFriendPiece(piece, i, col);
+      const distance = Math.abs(i - row);
+      if (isEmpty) {
+        moves.push({ row: i, col });
+      }
+      if (isEnemy && !isDownBreak) {
+        moves.push({ row: i, col });
+        isDownBreak = true;
+        break;
+      }
+
+      if (isFriend && distance === 1) {
+        break;
+      }
+      console.log({ piece, isFriend, isDownBreak, distance });
+      if (isFriend && !isDownBreak && distance > 1) {
+        moves.push({ row: i - 1, col });
+        isDownBreak = true;
+        break;
+      }
+    }
+    for (let i = col - 1; i >= 0; i--) {
+      const isEmpty = isEmptyCell(row, i);
+      const isEnemy = isEnemyPiece(piece, row, i);
+      const isFriends = isFriendPiece(piece, row, i);
+
+      if (isEmpty) {
+        moves.push({ row, col: i });
+      }
+
+      if (isEnemy && !isLeftBreak) {
+        moves.push({ row, col: i });
+        isLeftBreak = true;
+        break;
+      }
+      const distance = Math.abs(i - col);
+      if (isFriends && distance === 1) {
+        break;
+      }
+      if (isFriends && !isLeftBreak && distance > 1) {
+        moves.push({ row, col: i });
+        isUpBreak = true;
+        break;
+      }
+    }
+
+    for (let i = col + 1; i < 8; i++) {
+      const isEmpty = isEmptyCell(row, i);
+      const isEnemy = isEnemyPiece(piece, row, i);
+      const isFriends = isFriendPiece(piece, row, i);
+
+      if (isEmpty) {
+        moves.push({ row, col: i });
+      }
+
+      if (isEnemy && !isRightBreak) {
+        moves.push({ row, col: i });
+        isDownBreak = true;
+        break;
+      }
+      const distance = Math.abs(i - col);
+      if (isFriends && distance === 1) {
+        break;
+      }
+      if (isFriends && !isRightBreak && distance > 1) {
+        moves.push({ row, col: i - 1 });
+        isRightBreak = true;
+        break;
+      }
+    }
+
+    return moves;
+  };
+
   //funcion alfil
-  const moveBishop = () => {};
+  const moveBishop = (piece: Piece, row: number, col: number) => {
+    const moves: Move[] = [];
+    //arriba izq
+    for (let i = 1; i < 8; i++) {
+      const newRow = row - i;
+      const newCol = col - i;
+      if (!isInsideBoard(newRow, newCol)) break;
+      if (isEmptyCell(newRow, newCol)) {
+        moves.push({ row: newRow, col: newCol });
+        continue;
+      }
+      if (isEnemyPiece(piece, newRow, newCol)) {
+        moves.push({ row: newRow, col: newCol });
+      }
+      break;
+    }
+    //abajo izq
+    for (let i = 1; i < 8; i++) {
+      const newRow = row - i;
+      const newCol = col + i;
+      if (!isInsideBoard(newRow, newCol)) break;
+      if (isEmptyCell(newRow, newCol)) {
+        moves.push({ row: newRow, col: newCol });
+        continue;
+      }
+      if (isEnemyPiece(piece, newRow, newCol)) {
+        moves.push({ row: newRow, col: newCol });
+      }
+      break;
+    }
+    //derecha arriba
+    for (let i = 1; i < 8; i++) {
+      const newRow = row + i;
+      const newCol = col - i;
+      if (!isInsideBoard(newRow, newCol)) break;
+      if (isEmptyCell(newRow, newCol)) {
+        moves.push({ row: newRow, col: newCol });
+        continue;
+      }
+      if (isEnemyPiece(piece, newRow, newCol)) {
+        moves.push({ row: newRow, col: newCol });
+      }
+      break;
+    }
+    //derecha abajo
+    for (let i = 1; i < 8; i++) {
+      const newRow = row + i;
+      const newCol = col + i;
+      if (!isInsideBoard(newRow, newCol)) break;
+      if (isEmptyCell(newRow, newCol)) {
+        moves.push({ row: newRow, col: newCol });
+        continue;
+      }
+      if (isEnemyPiece(piece, newRow, newCol)) {
+        moves.push({ row: newRow, col: newCol });
+      }
+      break;
+    }
+
+    return moves;
+  };
   //funcion peon
-  const movePawn = () => {};
+  const movePawn = (piece: Piece, row: number, col: number): Move[] => {
+    const moves: Move[] = [];
+
+    const defaultRows = [1, 6];
+    const multiplier = defaultRows.includes(row) ? 2 : 1;
+    const direction = piece.color === "white" ? -1 : 1;
+    const nextRow = row + direction;
+
+    // if (isInsideBoard(nextRow, col)) {
+    //   moves.push({ row: nextRow, col });
+    // }
+    // if (multiplier === 2) {
+    //   const doubleRow = row + direction * 2;
+
+    //   if (isInsideBoard(doubleRow, col)) {
+    //     moves.push({ row: doubleRow, col });
+    //   }
+    // }
+    console.log({ multiplier });
+    Array.from({ length: multiplier }).forEach((_, index) => {
+      if (isInsideBoard(row + (index + 1) * direction, col)) {
+        moves.push({ row: row + (index + 1) * direction, col });
+      }
+    });
+
+    return moves;
+  };
 
   //obtener los movimientos
   const getPossibleMoves = (row: number, col: number): Move[] => {
@@ -151,17 +420,21 @@ export const Ajedrez = () => {
     //casos
     switch (piece.type) {
       case "C":
-        return moveHorse(row, col);
+        return moveHorse(piece, row, col);
       case "R":
-        return moveKing(row, col);
-
+        return moveKing(piece, row, col);
+      case "D":
+        return moveQueen(row, col);
+      case "T":
+        return moveTower(piece, row, col);
+      case "A":
+        return moveBishop(piece, row, col);
+      case "P":
+        return movePawn(piece, row, col);
       default:
         return [];
     }
   };
-
-  // guarda las sugerencia
-  const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
 
   const handleSelectPiece = (row: number, col: number) => {
     const moves = getPossibleMoves(row, col);
@@ -183,22 +456,21 @@ export const Ajedrez = () => {
 
             return (
               <button
-                title={
-                  cell && cell.type
-                    ? pieceAttribute[cell.type]?.label
-                    : undefined
-                }
-                key={`${rowIndex} - { colIndex }`}
-                className={`w-12 h-12 ${
-                  isPossibleMove
-                    ? "bg-green-400"
-                    : isWhite
-                      ? "bg-white text-black"
-                      : "bg-black text-white"
+                key={`${rowIndex}-${colIndex}`}
+                className={`relative w-12 h-12 ${
+                  isWhite ? "bg-white text-black" : "bg-black text-white"
                 }`}
                 onClick={() => handleSelectPiece(rowIndex, colIndex)}
               >
-                {cell ? `${cell.type}` : ""}
+                {isPossibleMove && (
+                  <span className="absolute inset-0 bg-green-400/40"></span>
+                )}
+
+                <span className="relative z-10">
+                  {cell
+                    ? `${cell.type}${cell.color && cell.color == "white" ? "" : "+"}`
+                    : ""}
+                </span>
               </button>
             );
           })}
