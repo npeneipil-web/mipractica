@@ -51,7 +51,7 @@ const boardDefault: Cell[][] = [
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
-  [null, null, null, { type: "C" }, null, null, null, null],
+  [null, null, null, { type: "R" }, null, null, null, null],
   [
     { type: "P" },
     { type: "P" },
@@ -93,7 +93,6 @@ export const Ajedrez = () => {
       { row: row + 1, col },
       { row: row + 1, col: col + 1 },
     ];
-
     const isBusy = moves.filter((move) => {
       const cell = board[move.row][move.col];
       return cell !== null;
