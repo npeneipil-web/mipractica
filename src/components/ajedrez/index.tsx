@@ -1,4 +1,4 @@
-import { Braces, Rose } from "lucide-react";
+import { Braces, Rose, Rows } from "lucide-react";
 import { useState } from "react";
 //crear los tipos de pieza y su color
 type PieceType = "R" | "D" | "T" | "C" | "A" | "P";
@@ -443,6 +443,12 @@ export const Ajedrez = () => {
     setPieceSelected({ piece, row, col, suggestions });
   };
 
+  //funcion para resetear
+  const resetBoard = () => {
+    setBoard(boardDefault.map((row) => [...row]));
+    setPieceSelected(null);
+  };
+
   return (
     <div className="mt-50 ">
       <div className="p-2">
@@ -478,6 +484,12 @@ export const Ajedrez = () => {
           })}
         </div>
       ))}
+      <button
+        className="w-25 h-10 left-35 bg-amber-400 border border-amber-100 relative top-5 rounded-md"
+        onClick={resetBoard}
+      >
+        Reset
+      </button>
     </div>
   );
 };
