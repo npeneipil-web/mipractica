@@ -9,6 +9,13 @@ interface Piece {
   type: PieceType;
   color: PieceColor;
 }
+type PieceSelected = {
+  piece: Piece;
+  row: number;
+  col: number;
+  suggestions: Move[];
+} | null;
+
 //casilla
 type Cell = Piece | null;
 
@@ -49,39 +56,12 @@ const boardDefault: Cell[][] = [
     { type: "P", color: "black" },
     { type: "P", color: "black" },
   ],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
   [
-    { type: "P", color: "black" },
-    null,
-    null,
-    null,
-    null,
-    { type: "T", color: "white" },
-    null,
-    null,
-  ],
-  [
-    null,
-    null,
-    null,
-    { type: "D", color: "black" },
-    { type: "T", color: "white" },
-    null,
-    null,
-    null,
-  ],
-  [
-    null,
-    null,
-    null,
-    { type: "A", color: "white" },
-    { type: "T", color: "white" },
-    { type: "C", color: "white" },
-    null,
-    null,
-  ],
-  [{ type: "P", color: "white" }, null, null, null, null, null, null, null],
-  [
-    null,
+    { type: "P", color: "white" },
     { type: "P", color: "white" },
     { type: "P", color: "white" },
     { type: "P", color: "white" },
@@ -103,10 +83,14 @@ const boardDefault: Cell[][] = [
 ];
 
 export const Ajedrez = () => {
+  // ESTADOS
   //tablero
   const [board, setBoard] = useState<Cell[][]>(boardDefault);
   // guarda las sugerencia
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
+  //pieza tomada
+
+  const [pieceSelected, setPieceSelected] = useState<PieceSelected>(null);
 
   //FUNCIONES
   //funcion para validar limites | sirve para no devolver posiciones fuera del tablero
@@ -150,8 +134,13 @@ export const Ajedrez = () => {
       { row: row + 1, col },
       { row: row + 1, col: col + 1 },
     ];
-    //return moves.filter((move) => {if(!isInsideBoard(move.row, move.col))});
-    return [];
+    return moves.filter((move) => {
+      if (!isInsideBoard(move.row, move.col)) return false;
+
+      if (isFriendPiece(piece, move.row, move.col)) return false;
+
+      return true;
+    });
   };
   //funcion del caballo
   const moveHorse = (piece: Piece, row: number, col: number): Move[] => {
@@ -176,38 +165,8 @@ export const Ajedrez = () => {
   };
 
   //funcion reina|dama
-  const moveQueen = (row: number, col: number) => {
-    const moves = [];
-    for (let i = 1; i < 8; i++) {
-      if (isInsideBoard(row - i, col - i)) {
-        moves.push({ row: row - i, col: col - i });
-      }
-
-      if (isInsideBoard(row - i, col + i)) {
-        moves.push({ row: row - i, col: col + i });
-      }
-
-      if (isInsideBoard(row + i, col - i)) {
-        moves.push({ row: row + i, col: col - i });
-      }
-
-      if (isInsideBoard(row + i, col + i)) {
-        moves.push({ row: row + i, col: col + i });
-      }
-      if (isInsideBoard(row + i, col)) {
-        moves.push({ row: row + i, col });
-      }
-      if (isInsideBoard(row - i, col)) {
-        moves.push({ row: row - i, col });
-      }
-      if (isInsideBoard(row, col + i)) {
-        moves.push({ row, col: col + i });
-      }
-      if (isInsideBoard(row, col - i)) {
-        moves.push({ row, col: col - i });
-      }
-    }
-    return moves;
+  const moveQueen = (piece: Piece, row: number, col: number) => {
+    return [...moveTower(piece, row, col), ...moveBishop(piece, row, col)];
   };
   //funcion torre
   const moveTower = (piece: Piece, row: number, col: number): Move[] => {
@@ -390,24 +349,37 @@ export const Ajedrez = () => {
     const defaultRows = [1, 6];
     const multiplier = defaultRows.includes(row) ? 2 : 1;
     const direction = piece.color === "white" ? -1 : 1;
+
+    // avance hacia adelante
+    for (let index = 0; index < multiplier; index++) {
+      const nextRow = row + (index + 1) * direction;
+
+      if (!isInsideBoard(nextRow, col)) break;
+
+      // si hay una pieza al frente, ya no puede seguir avanzando
+      if (!isEmptyCell(nextRow, col)) break;
+
+      moves.push({ row: nextRow, col });
+    }
+
+    // diagonales para capturar
+    const diagonalLeftCol = col - 1;
+    const diagonalRightCol = col + 1;
     const nextRow = row + direction;
 
-    // if (isInsideBoard(nextRow, col)) {
-    //   moves.push({ row: nextRow, col });
-    // }
-    // if (multiplier === 2) {
-    //   const doubleRow = row + direction * 2;
+    if (
+      isInsideBoard(nextRow, diagonalLeftCol) &&
+      isEnemyPiece(piece, nextRow, diagonalLeftCol)
+    ) {
+      moves.push({ row: nextRow, col: diagonalLeftCol });
+    }
 
-    //   if (isInsideBoard(doubleRow, col)) {
-    //     moves.push({ row: doubleRow, col });
-    //   }
-    // }
-    console.log({ multiplier });
-    Array.from({ length: multiplier }).forEach((_, index) => {
-      if (isInsideBoard(row + (index + 1) * direction, col)) {
-        moves.push({ row: row + (index + 1) * direction, col });
-      }
-    });
+    if (
+      isInsideBoard(nextRow, diagonalRightCol) &&
+      isEnemyPiece(piece, nextRow, diagonalRightCol)
+    ) {
+      moves.push({ row: nextRow, col: diagonalRightCol });
+    }
 
     return moves;
   };
@@ -424,7 +396,7 @@ export const Ajedrez = () => {
       case "R":
         return moveKing(piece, row, col);
       case "D":
-        return moveQueen(row, col);
+        return moveQueen(piece, row, col);
       case "T":
         return moveTower(piece, row, col);
       case "A":
@@ -436,9 +408,39 @@ export const Ajedrez = () => {
     }
   };
 
+  const movePiece = (toRow: number, toCol: number) => {
+    if (!pieceSelected) return;
+
+    const newBoard = board.map((row) => [...row]);
+
+    newBoard[toRow][toCol] = pieceSelected.piece;
+    newBoard[pieceSelected.row][pieceSelected.col] = null;
+
+    setBoard(newBoard);
+    setPieceSelected(null);
+  };
+
   const handleSelectPiece = (row: number, col: number) => {
-    const moves = getPossibleMoves(row, col);
-    setPossibleMoves(moves);
+    if (pieceSelected) {
+      const isSuggestion = pieceSelected.suggestions.some(
+        (move) => move.row === row && move.col === col,
+      );
+
+      if (isSuggestion) {
+        movePiece(row, col);
+        return;
+      }
+    }
+
+    const piece = board[row][col];
+
+    if (!piece) {
+      setPieceSelected(null);
+      return;
+    }
+
+    const suggestions = getPossibleMoves(row, col);
+    setPieceSelected({ piece, row, col, suggestions });
   };
 
   return (
@@ -450,7 +452,7 @@ export const Ajedrez = () => {
         <div key={rowIndex} className="flex border">
           {row.map((cell, colIndex) => {
             const isWhite = (rowIndex + colIndex) % 2 === 0;
-            const isPossibleMove = possibleMoves.some(
+            const isPossibleMove = pieceSelected?.suggestions.some(
               (move) => move.row === rowIndex && move.col === colIndex,
             );
 
