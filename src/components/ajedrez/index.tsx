@@ -1,4 +1,5 @@
 import { Braces, Rose, Rows } from "lucide-react";
+import { useEffect } from "react";
 import { useState } from "react";
 //crear los tipos de pieza y su color
 type PieceType = "R" | "D" | "T" | "C" | "A" | "P";
@@ -25,13 +26,23 @@ type Move = {
   col: number;
 };
 
+type Player = "white" | "black";
+
 interface PieceAttribute {
   label: string;
   src: string;
+  variant?: {
+    black: string;
+    white: string;
+  };
 }
 const pieceAttribute: Record<string, PieceAttribute> = {
-  C: { label: "Caballo", src: "" },
-  P: { label: "Peon", src: "" },
+  C: { label: "Caballo", src: "♘", variant: { white: "♘", black: "♞" } },
+  P: { label: "Peon", src: "♙", variant: { white: "♙", black: "♟" } },
+  D: { label: "Reina", src: "♕", variant: { white: "♕", black: "♛" } },
+  T: { label: "Torre", src: "♖", variant: { white: "♖", black: "♜" } },
+  A: { label: "Alfil", src: "♗", variant: { white: "♗", black: "♝" } },
+  R: { label: "Rey", src: "♔", variant: { white: "♔", black: "♚" } },
 };
 
 //tablero por defecto
@@ -86,11 +97,23 @@ export const Ajedrez = () => {
   // ESTADOS
   //tablero
   const [board, setBoard] = useState<Cell[][]>(boardDefault);
-  // guarda las sugerencia
-  const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
-  //pieza tomada
 
+  //turnos
+  const [turn, setTurn] = useState<Player>("white");
   const [pieceSelected, setPieceSelected] = useState<PieceSelected>(null);
+
+  //piezas capturadas
+  const [capturedWhite, setCapturedWhite] = useState<Cell[]>([]);
+  const [capturedBlack, setCapturedBlack] = useState<Cell[]>([]);
+
+  //mensaje en jaque
+  const [messaje, setMessage] = useState("");
+
+  //tiempo por jugador
+  const [whiteTime, setWhiteTime] = useState(0);
+  const [blackTime, setBlackTime] = useState(0);
+
+  const [isRunning, setIsRunning] = useState(false);
 
   //FUNCIONES
   //funcion para validar limites | sirve para no devolver posiciones fuera del tablero
@@ -363,23 +386,32 @@ export const Ajedrez = () => {
     }
 
     // diagonales para capturar
-    const diagonalLeftCol = col - 1;
-    const diagonalRightCol = col + 1;
-    const nextRow = row + direction;
+    //const diagonalLeftCol = col - 1;
+    //const diagonalRightCol = col + 1;
+    //const nextRow = row + direction;
 
-    if (
-      isInsideBoard(nextRow, diagonalLeftCol) &&
-      isEnemyPiece(piece, nextRow, diagonalLeftCol)
-    ) {
-      moves.push({ row: nextRow, col: diagonalLeftCol });
-    }
+    //if (
+    //isInsideBoard(nextRow, diagonalLeftCol) &&
+    //isEnemyPiece(piece, nextRow, diagonalLeftCol)
+    //) {
+    // moves.push({ row: nextRow, col: diagonalLeftCol });
+    //}
 
-    if (
-      isInsideBoard(nextRow, diagonalRightCol) &&
-      isEnemyPiece(piece, nextRow, diagonalRightCol)
-    ) {
-      moves.push({ row: nextRow, col: diagonalRightCol });
-    }
+    //if (
+    //isInsideBoard(nextRow, diagonalRightCol) &&
+    //isEnemyPiece(piece, nextRow, diagonalRightCol)
+    //) {
+    // moves.push({ row: nextRow, col: diagonalRightCol });
+    //}
+
+    //llama a movimientos atancantes en diagonal
+    const attackMoves = getPawnAttackMoves(piece, row, col);
+
+    attackMoves.forEach((move) => {
+      if (isEnemyPiece(piece, move.row, move.col)) {
+        moves.push(move);
+      }
+    });
 
     return moves;
   };
@@ -413,14 +445,28 @@ export const Ajedrez = () => {
 
     const newBoard = board.map((row) => [...row]);
 
+    const capturedPiece = newBoard[toRow][toCol];
+
+    if (capturedPiece) {
+      if (pieceSelected.piece.color === "white") {
+        setCapturedBlack((prev) => [...prev, capturedPiece]);
+      } else {
+        setCapturedWhite((prev) => [...prev, capturedPiece]);
+      }
+    }
+
     newBoard[toRow][toCol] = pieceSelected.piece;
     newBoard[pieceSelected.row][pieceSelected.col] = null;
 
     setBoard(newBoard);
     setPieceSelected(null);
+    setTurn(turn === "white" ? "black" : "white");
   };
-
+  //manejar pieza seleccionada
   const handleSelectPiece = (row: number, col: number) => {
+    if (!isRunning) {
+      return;
+    }
     if (pieceSelected) {
       const isSuggestion = pieceSelected.suggestions.some(
         (move) => move.row === row && move.col === col,
@@ -431,28 +477,222 @@ export const Ajedrez = () => {
         return;
       }
     }
-
     const piece = board[row][col];
 
     if (!piece) {
       setPieceSelected(null);
       return;
     }
+    if (piece.color != turn) {
+      return;
+    }
 
-    const suggestions = getPossibleMoves(row, col);
+    let suggestions = getPossibleMoves(row, col);
+    const isInCheck = isKingInCheck(turn);
+
+    if (isInCheck) {
+      const threats = getCheckingPieces(turn);
+
+      if (piece.type !== "R") {
+        suggestions = suggestions.filter((move) =>
+          threats.some(
+            (threat) => threat.row === move.row && threat.col === move.col,
+          ),
+        );
+      }
+    }
+
     setPieceSelected({ piece, row, col, suggestions });
+  };
+
+  //Rey en Jaque
+  //encontar al rey
+  const findKing = (color: PieceColor) => {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = board[row][col];
+
+        if (piece?.type === "R" && piece.color === color) {
+          return { row, col };
+        }
+      }
+    }
+    return null;
+  };
+  //saber si el peon amenza al rey
+  const getPawnAttackMoves = (
+    piece: Piece,
+    row: number,
+    col: number,
+  ): Move[] => {
+    const direction = piece.color === "white" ? -1 : 1;
+
+    return [
+      { row: row + direction, col: col - 1 },
+      { row: row + direction, col: col + 1 },
+    ].filter((move) => isInsideBoard(move.row, move.col));
+  };
+  //ataque
+  const getAttackMoves = (row: number, col: number): Move[] => {
+    const piece = board[row][col];
+
+    if (!piece) return [];
+
+    if (piece.type === "P") {
+      return getPawnAttackMoves(piece, row, col);
+    }
+
+    return getPossibleMoves(row, col);
+  };
+
+  // funcion que detecta el jaque
+
+  const isKingInCheck = (color: PieceColor) => {
+    const kingPosition = findKing(color);
+
+    if (!kingPosition) return false;
+
+    const enemyColor = color === "white" ? "black" : "white";
+
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = board[row][col];
+        if (!piece || piece.color !== enemyColor) continue;
+        {
+          const attackMoves = getAttackMoves(row, col);
+          const isThreateningKing = attackMoves.some(
+            (move) =>
+              move.row === kingPosition.row && move.col === kingPosition.col,
+          );
+
+          if (isThreateningKing) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const whiteInCheck = isKingInCheck("white");
+    const blackInCheck = isKingInCheck("black");
+
+    if (whiteInCheck) {
+      setMessage("Jaque al rey Blanco");
+    } else if (blackInCheck) {
+      setMessage("Jaque al rey Negro");
+    } else {
+      setMessage("");
+    }
+  }, [board]);
+
+  //que pieza esta dando jaque
+  const getCheckingPieces = (color: PieceColor): Move[] => {
+    const kingPosition = findKing(color);
+
+    if (!kingPosition) return [];
+
+    const enemyColor = color === "white" ? "black" : "white";
+    const threats: Move[] = [];
+
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = board[row][col];
+
+        if (!piece || piece.color !== enemyColor) continue;
+
+        const attackMoves = getAttackMoves(row, col);
+
+        const isThreateningKing = attackMoves.some(
+          (move) =>
+            move.row === kingPosition.row && move.col === kingPosition.col,
+        );
+
+        if (isThreateningKing) {
+          threats.push({ row, col });
+        }
+      }
+    }
+
+    return threats;
+  };
+
+  // Cronometro
+  useEffect(() => {
+    if (!isRunning) return;
+
+    const interval = setInterval(() => {
+      if (turn === "white") {
+        setWhiteTime((prev) => prev + 10);
+      } else {
+        setBlackTime((prev) => prev + 10);
+      }
+    }, 10);
+
+    return () => clearInterval(interval);
+  }, [turn, isRunning]);
+
+  const addZero = (value: number) => value.toString().padStart(2, "0");
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60000);
+    const seconds = Math.floor((time % 60000) / 1000);
+    const milliseconds = Math.floor((time % 1000) / 10);
+
+    return `${addZero(minutes)}:${addZero(seconds)}:${addZero(milliseconds)}`;
   };
 
   //funcion para resetear
   const resetBoard = () => {
     setBoard(boardDefault.map((row) => [...row]));
     setPieceSelected(null);
+    setTurn("white");
+    setCapturedWhite([]);
+    setCapturedBlack([]);
+    setWhiteTime(0);
+    setBlackTime(0);
+    setIsRunning(true);
+  };
+  //iniciar
+  const startBoard = () => {
+    setIsRunning(true);
   };
 
+  //funcion para terminar
+  const finish = () => {
+    setBoard(boardDefault.map((row) => [...row]));
+    setPieceSelected(null);
+    setTurn("white");
+    setCapturedWhite([]);
+    setCapturedBlack([]);
+    setWhiteTime(0);
+    setBlackTime(0);
+    setIsRunning(false);
+  };
+  // funcion render
+  const pieceRender = (cell: Cell) => {
+    return (
+      cell &&
+      cell.type &&
+      (pieceAttribute[cell.type]?.variant?.[cell.color] ??
+        `${cell?.type}${cell?.color && cell.color == "white" ? "" : "+"}`)
+    );
+  };
   return (
-    <div className="mt-50 ">
-      <div className="p-2">
-        <p className="font-bold font-mono text-[25px] text-center">Ajedrez</p>
+    <div className="mt-50">
+      <div className="absolute left-80 top-85 w-60 rounded-2xl text-center">
+        <p>Piezas blancas capturadas: </p>
+        <div className="grid grid-cols-4 text-4xl ">
+          {capturedWhite.map((piece) => pieceRender(piece)) || "Ninguna"}
+        </div>
+      </div>
+      <div className="p-4">
+        <p className="font-bold font-mono text-[30px] text-center">Ajedrez</p>
+        <p className="mt-2 text-center">Turno de "{turn}"</p>
+      </div>
+      <div className="flex justify-center items-center w-full">
+        Tiempo: {formatTime(blackTime)}
       </div>
       {board.map((row, rowIndex) => (
         <div key={rowIndex} className="flex border">
@@ -474,22 +714,50 @@ export const Ajedrez = () => {
                   <span className="absolute inset-0 bg-green-400/40"></span>
                 )}
 
-                <span className="relative z-10">
-                  {cell
-                    ? `${cell.type}${cell.color && cell.color == "white" ? "" : "+"}`
-                    : ""}
+                <span className="relative z-10 text-4xl">
+                  {pieceRender(cell)}
                 </span>
               </button>
             );
           })}
         </div>
       ))}
-      <button
-        className="w-25 h-10 left-35 bg-amber-400 border border-amber-100 relative top-5 rounded-md"
-        onClick={resetBoard}
-      >
-        Reset
-      </button>
+      <div className="flex justify-center items-center w-full">
+        Tiempo: {formatTime(whiteTime)}
+      </div>
+      <div className="  absolute   rounded-2xl right-40 w-70">
+        <p className="text-center">Piezas negras capturadas: </p>
+        <div className="grid grid-cols-4 text-4xl">
+          {capturedBlack.map((cell: Cell) => pieceRender(cell)) || "Ninguna"}
+        </div>
+      </div>
+      <div className="flex justify-center mt-2">
+        <button
+          className="w-25 h-10 left-35 bg-amber-400 border border-amber-100 hover:bg-amber-300 rounded-md"
+          onClick={startBoard}
+        >
+          Start
+        </button>
+        <button
+          className="w-25 h-10 left-35 bg-amber-400 border border-amber-100 hover:bg-amber-300 rounded-md"
+          onClick={resetBoard}
+        >
+          Reset
+        </button>
+        <button
+          className="w-25 h-10 left-35 bg-amber-400 border border-amber-100 hover:bg-amber-300 rounded-md"
+          onClick={finish}
+        >
+          Terminar
+        </button>
+      </div>
+
+      <div className="relative top-10">
+        {" "}
+        {messaje && (
+          <p className="text-center font-bold text-[20px]">{messaje}</p>
+        )}
+      </div>
     </div>
   );
 };
