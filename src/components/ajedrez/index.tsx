@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { Braces, Rose, Rows } from "lucide-react";
+import { useEffect } from "react";
+import { useState } from "react";
 //crear los tipos de pieza y su color
 type PieceType = "R" | "D" | "T" | "C" | "A" | "P";
 type PieceColor = "white" | "black";
@@ -26,15 +28,6 @@ type Move = {
 
 type Player = "white" | "black";
 
-type HasMoved = {
-  whiteKing: boolean;
-  blackKing: boolean;
-  whiteLeftTower: boolean;
-  whiteRightTower: boolean;
-  blackLeftTower: boolean;
-  blackRightTower: boolean;
-};
-
 interface PieceAttribute {
   label: string;
   src: string;
@@ -58,9 +51,9 @@ const boardDefault: Cell[][] = [
     { type: "T", color: "black" },
     { type: "C", color: "black" },
     { type: "A", color: "black" },
-    { type: "D", color: "black" },
+    null, //{ type: "D", color: "black" },
     { type: "R", color: "black" },
-    { type: "A", color: "black" },
+    null, //{ type: "A", color: "black" },
     { type: "C", color: "black" },
     { type: "T", color: "black" },
   ],
@@ -70,12 +63,12 @@ const boardDefault: Cell[][] = [
     { type: "P", color: "black" },
     { type: "P", color: "black" },
     { type: "P", color: "black" },
-    { type: "P", color: "black" },
+    { type: "P", color: "white" },
     { type: "P", color: "black" },
     { type: "P", color: "black" },
   ],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, { type: "A", color: "black" }, null, null, null],
+  [null, null, null, { type: "R", color: "white" }, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   [
@@ -92,46 +85,99 @@ const boardDefault: Cell[][] = [
     { type: "T", color: "white" },
     { type: "C", color: "white" },
     { type: "A", color: "white" },
-    { type: "D", color: "white" },
-    { type: "R", color: "white" },
+    { type: "D", color: "white" }, //{ type: "D", color: "white" },
+    // { type: "R", color: "white" },
+    null,
     { type: "A", color: "white" },
     { type: "C", color: "white" },
     { type: "T", color: "white" },
   ],
 ];
-
-const initialHasMoved: HasMoved = {
-  whiteKing: false,
-  blackKing: false,
-  whiteLeftTower: false,
-  whiteRightTower: false,
-  blackLeftTower: false,
-  blackRightTower: false,
-};
+const LOCAL_STORAGE_KEY = "ajedrez";
 
 export const Ajedrez = () => {
   // ESTADOS
   //tablero
-  const [board, setBoard] = useState<Cell[][]>(boardDefault);
+  const [board, setBoard] = useState<Cell[][]>(() => {
+    if (typeof window === "undefined") return boardDefault;
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved).board : boardDefault;
+  });
 
   //turnos
-  const [turn, setTurn] = useState<Player>("white");
+  const [turn, setTurn] = useState<Player>(() => {
+    if (typeof window === "undefined") return "white";
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved).turn : "white";
+  });
   const [pieceSelected, setPieceSelected] = useState<PieceSelected>(null);
 
   //piezas capturadas
-  const [capturedWhite, setCapturedWhite] = useState<Cell[]>([]);
-  const [capturedBlack, setCapturedBlack] = useState<Cell[]>([]);
+  const [capturedWhite, setCapturedWhite] = useState<Cell[]>(() => {
+    if (typeof window === "undefined") return [];
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved).capturedWhite : [];
+  });
+
+  const [capturedBlack, setCapturedBlack] = useState<Cell[]>(() => {
+    if (typeof window === "undefined") return [];
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved).capturedBlack : [];
+  });
 
   //mensaje en jaque
   const [messaje, setMessage] = useState("");
 
   //tiempo por jugador
-  const [whiteTime, setWhiteTime] = useState(0);
-  const [blackTime, setBlackTime] = useState(0);
+  const [whiteTime, setWhiteTime] = useState<number>(() => {
+    if (typeof window === "undefined") return 0;
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved).whiteTime : 0;
+  });
 
-  const [isRunning, setIsRunning] = useState(false);
-  // El rey y torre no se ha movido
-  const [hasMoved, setHasMoved] = useState<HasMoved>(initialHasMoved);
+  const [blackTime, setBlackTime] = useState<number>(() => {
+    if (typeof window === "undefined") return 0;
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved).blackTime : 0;
+  });
+
+  const [isRunning, setIsRunning] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved).isRunning : false;
+  });
+
+  //enroque
+  const [castling, setCastling] = useState(() => {
+    if (typeof window === "undefined")
+      return {
+        white: {
+          kingMoved: false,
+          leftRookMoved: false,
+          rightRookMoved: false,
+        },
+        black: {
+          kingMoved: false,
+          leftRookMoved: false,
+          rightRookMoved: false,
+        },
+      };
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved
+      ? JSON.parse(saved).castling
+      : {
+        white: {
+          kingMoved: false,
+          leftRookMoved: false,
+          rightRookMoved: false,
+        },
+        black: {
+          kingMoved: false,
+          leftRookMoved: false,
+          rightRookMoved: false,
+        },
+      };
+  });
 
   //FUNCIONES
   //funcion para validar limites | sirve para no devolver posiciones fuera del tablero
@@ -139,70 +185,87 @@ export const Ajedrez = () => {
     return row >= 0 && row < 8 && col >= 0 && col < 8;
   };
 
-  const isEmptyCell = (row: number, col: number, gameBoard = board) => {
-    return gameBoard[row][col] === null;
+  const isEmptyCell = (row: number, col: number) => {
+    return board[row][col] === null;
   };
 
-  const isEnemyPiece = (
-    piece: Piece,
-    row: number,
-    col: number,
-    gameBoard = board,
-  ) => {
-    const target = gameBoard[row][col];
+  const isEnemyPiece = (piece: Piece, row: number, col: number) => {
+    const target = board[row][col];
     return target !== null && target.color !== piece.color;
   };
-  const isFriendPiece = (
-    piece: Piece,
-    row: number,
-    col: number,
-    gameBoard = board,
-  ) => {
-    const target = gameBoard[row][col];
+  const isFriendPiece = (piece: Piece, row: number, col: number) => {
+    const target = board[row][col];
     return target !== null && target.color === piece.color;
+  };
+
+  const isOwnPiece = (piece: Piece, row: number, col: number) => {
+    const target = board[row][col];
+    return (
+      target !== null &&
+      target.color == piece.color &&
+      target.type === piece.type
+    );
   };
 
   //VALIDACIONES DE CASILLAS
 
   // funcion rey
-  const moveKing = (
-    piece: Piece,
-    row: number,
-    col: number,
-    includeCastling = true,
-    gameBoard = board,
-  ) => {
+  const moveKing = (piece: Piece, row: number, col: number) => {
     const moves = [
-      { row: row - 1, col: col - 1 },
-      { row: row - 1, col },
-      { row: row - 1, col: col + 1 },
-      { row, col: col - 1 },
-      { row, col: col + 1 },
-      { row: row + 1, col: col - 1 },
-      { row: row + 1, col },
-      { row: row + 1, col: col + 1 },
+      { row: row - 1, col: col - 1 }, // diagonal izquierda abajo
+      { row: row - 1, col }, // abajo
+      { row: row - 1, col: col + 1 }, // diagonal derecha abajo
+      { row, col: col - 1 }, // izquierda
+
+      { row, col: col + 1 }, // derecha
+      { row: row + 1, col: col - 1 }, // diagonal izquierda arriba
+      { row: row + 1, col }, // arriba
+      { row: row + 1, col: col + 1 }, // diagonal izquierda arroba
     ];
-    const normalMoves = moves.filter((move) => {
+
+    // verificar si las torres izquierda no se ha movido
+    // sed agrega el movimiento adicional a la izquierda
+    // { row, col: col - 2 }, { row, col: col - 3 }, si es blanca { row, col: col - 2 }, si es negra
+
+    // verificar si la tottre derecha no se ha movido
+    // agreg los movimientos adicionales
+
+    const validMoves = moves.filter((move) => {
       if (!isInsideBoard(move.row, move.col)) return false;
 
-      if (isFriendPiece(piece, move.row, move.col, gameBoard)) return false;
+      if (isFriendPiece(piece, move.row, move.col)) return false;
 
       return true;
     });
+    if (!castling[piece.color].kingMoved) {
+      // enroque largo
+      if (
+        !castling[piece.color].leftRookMoved &&
+        isEmptyCell(row, col - 1) &&
+        isEmptyCell(row, col - 2) &&
+        isEmptyCell(row, col - 3) &&
+        board[row][0]?.type === "T" &&
+        board[row][0]?.color === piece.color
+      ) {
+        validMoves.push({ row, col: col - 2 });
+      }
 
-    if (!includeCastling) return normalMoves;
+      // enroque corto
+      if (
+        !castling[piece.color].rightRookMoved &&
+        isEmptyCell(row, col + 1) &&
+        isEmptyCell(row, col + 2) &&
+        board[row][7]?.type === "T" &&
+        board[row][7]?.color === piece.color
+      ) {
+        validMoves.push({ row, col: col + 2 });
+      }
+    }
 
-    const castlingMoves =
-      gameBoard === board ? getCastlingMoves(piece, row, col) : [];
-    return [...normalMoves, ...castlingMoves];
+    return validMoves;
   };
   //funcion del caballo
-  const moveHorse = (
-    piece: Piece,
-    row: number,
-    col: number,
-    gameBoard = board,
-  ): Move[] => {
+  const moveHorse = (piece: Piece, row: number, col: number): Move[] => {
     const moves = [
       { row: row - 2, col: col - 1 },
       { row: row - 2, col: col + 1 },
@@ -217,137 +280,204 @@ export const Ajedrez = () => {
     return moves.filter((move) => {
       if (!isInsideBoard(move.row, move.col)) return false;
 
-      if (isFriendPiece(piece, move.row, move.col, gameBoard)) return false;
+      if (isFriendPiece(piece, move.row, move.col)) return false;
 
       return true;
     });
   };
 
   //funcion reina|dama
-  const moveQueen = (
-    piece: Piece,
-    row: number,
-    col: number,
-    gameBoard = board,
-  ) => {
-    return [
-      ...moveTower(piece, row, col, gameBoard),
-      ...moveBishop(piece, row, col, gameBoard),
-    ];
+  const moveQueen = (piece: Piece, row: number, col: number) => {
+    return [...moveTower(piece, row, col), ...moveBishop(piece, row, col)];
   };
   //funcion torre
-  const moveTower = (
-    piece: Piece,
-    row: number,
-    col: number,
-    gameBoard = board,
-  ): Move[] => {
+  const moveTower = (piece: Piece, row: number, col: number): Move[] => {
     const moves: Move[] = [];
 
-    const directions = [
-      { row: -1, col: 0 },
-      { row: 1, col: 0 },
-      { row: 0, col: -1 },
-      { row: 0, col: 1 },
-    ];
+    let isUpBreak = false;
+    let isDownBreak = false;
+    let isLeftBreak = false;
+    let isRightBreak = false;
+    for (let i = row - 1; i >= 0; i--) {
+      const isEmpty = isEmptyCell(i, col);
+      const isEnemy = isEnemyPiece(piece, i, col);
+      const isFriends = isFriendPiece(piece, i, col);
 
-    directions.forEach((direction) => {
-      for (let i = 1; i < 8; i++) {
-        const nextRow = row + direction.row * i;
-        const nextCol = col + direction.col * i;
+      if (isEmpty) {
+        moves.push({ row: i, col });
+      }
+      if (isEnemy && !isUpBreak) {
+        moves.push({ row: i, col });
+        isUpBreak = true;
+      }
 
-        if (!isInsideBoard(nextRow, nextCol)) break;
+      const distance = Math.abs(i - row);
 
-        if (isEmptyCell(nextRow, nextCol, gameBoard)) {
-          moves.push({ row: nextRow, col: nextCol });
-          continue;
-        }
-
-        if (isEnemyPiece(piece, nextRow, nextCol, gameBoard)) {
-          moves.push({ row: nextRow, col: nextCol });
-        }
-
+      if (isFriends && distance === 1) {
         break;
       }
-    });
+      if (isFriends) {
+        break;
+      }
+      if (isFriends && !isUpBreak && distance > 1) {
+        moves.push({ row: i + 1, col });
+        isUpBreak = true;
+        break;
+      }
+    }
+
+    for (let i = row + 1; i < 8; i++) {
+      const isEmpty = isEmptyCell(i, col);
+      const isEnemy = isEnemyPiece(piece, i, col);
+      const isFriends = isFriendPiece(piece, i, col);
+      const distance = Math.abs(i - row);
+      if (isEmpty) {
+        moves.push({ row: i, col });
+      }
+      if (isEnemy && !isDownBreak) {
+        moves.push({ row: i, col });
+        isDownBreak = true;
+      }
+
+      if (isFriends && distance === 1) {
+        break;
+      }
+      if (isFriends) {
+        break;
+      }
+      console.log({ piece, isFriends, isDownBreak, distance });
+      if (isFriends && !isDownBreak && distance > 1) {
+        moves.push({ row: i - 1, col });
+        isDownBreak = true;
+        break;
+      }
+    }
+    for (let i = col - 1; i >= 0; i--) {
+      const isEmpty = isEmptyCell(row, i);
+      const isEnemy = isEnemyPiece(piece, row, i);
+      const isFriends = isFriendPiece(piece, row, i);
+
+      if (isEmpty) {
+        moves.push({ row, col: i });
+      }
+
+      if (isEnemy && !isLeftBreak) {
+        moves.push({ row, col: i });
+        isLeftBreak = true;
+      }
+      const distance = Math.abs(i - col);
+      if (isFriends && distance === 1) {
+        break;
+      }
+      if (isFriends) {
+        break;
+      }
+
+      if (isFriends && !isLeftBreak && distance > 1) {
+        moves.push({ row, col: i });
+        isUpBreak = true;
+        break;
+      }
+    }
+
+    for (let i = col + 1; i < 8; i++) {
+      const isEmpty = isEmptyCell(row, i);
+      const isEnemy = isEnemyPiece(piece, row, i);
+      const isFriends = isFriendPiece(piece, row, i);
+
+      if (isEmpty) {
+        moves.push({ row, col: i });
+      }
+
+      if (isEnemy && !isRightBreak) {
+        moves.push({ row, col: i });
+        isDownBreak = true;
+      }
+      const distance = Math.abs(i - col);
+      if (isFriends && distance === 1) {
+        break;
+      }
+      if (isFriends) {
+        break;
+      }
+      if (isFriends && !isRightBreak && distance > 1) {
+        moves.push({ row, col: i - 1 });
+        isRightBreak = true;
+        break;
+      }
+    }
 
     return moves;
   };
 
   //funcion alfil
-  const moveBishop = (
-    piece: Piece,
-    row: number,
-    col: number,
-    gameBoard = board,
-  ) => {
+  const moveBishop = (piece: Piece, row: number, col: number) => {
     const moves: Move[] = [];
     //arriba izq
     for (let i = 1; i < 8; i++) {
       const newRow = row - i;
       const newCol = col - i;
       if (!isInsideBoard(newRow, newCol)) break;
-      if (isEmptyCell(newRow, newCol, gameBoard)) {
+      if (isEmptyCell(newRow, newCol)) {
         moves.push({ row: newRow, col: newCol });
         continue;
       }
-      if (isEnemyPiece(piece, newRow, newCol, gameBoard)) {
+      if (isEnemyPiece(piece, newRow, newCol)) {
         moves.push({ row: newRow, col: newCol });
+        break;
       }
-      break;
     }
-    //abajo izq
+    //arriba derecha
+    let breakLeftDown = false;
     for (let i = 1; i < 8; i++) {
       const newRow = row - i;
       const newCol = col + i;
       if (!isInsideBoard(newRow, newCol)) break;
-      if (isEmptyCell(newRow, newCol, gameBoard)) {
+      if (isEmptyCell(newRow, newCol)) {
         moves.push({ row: newRow, col: newCol });
         continue;
       }
-      if (isEnemyPiece(piece, newRow, newCol, gameBoard)) {
+
+      if (isEnemyPiece(piece, newRow, newCol)) {
         moves.push({ row: newRow, col: newCol });
+        break;
       }
-      break;
     }
-    //derecha arriba
+    //abajo izquierda
     for (let i = 1; i < 8; i++) {
       const newRow = row + i;
       const newCol = col - i;
       if (!isInsideBoard(newRow, newCol)) break;
-      if (isEmptyCell(newRow, newCol, gameBoard)) {
+      if (isEmptyCell(newRow, newCol)) {
         moves.push({ row: newRow, col: newCol });
         continue;
       }
-      if (isEnemyPiece(piece, newRow, newCol, gameBoard)) {
+      const distance = newRow - row / newCol - col;
+      console.log({ distance, row, col, newRow, newCol });
+      if (isEnemyPiece(piece, newRow, newCol)) {
         moves.push({ row: newRow, col: newCol });
+        break;
       }
-      break;
     }
-    //derecha abajo
+    //abajo derecha
     for (let i = 1; i < 8; i++) {
       const newRow = row + i;
       const newCol = col + i;
       if (!isInsideBoard(newRow, newCol)) break;
-      if (isEmptyCell(newRow, newCol, gameBoard)) {
+      if (isEmptyCell(newRow, newCol)) {
         moves.push({ row: newRow, col: newCol });
         continue;
       }
-      if (isEnemyPiece(piece, newRow, newCol, gameBoard)) {
+      if (isEnemyPiece(piece, newRow, newCol)) {
         moves.push({ row: newRow, col: newCol });
+        break;
       }
-      break;
     }
 
     return moves;
   };
   //funcion peon
-  const movePawn = (
-    piece: Piece,
-    row: number,
-    col: number,
-    gameBoard = board,
-  ): Move[] => {
+  const movePawn = (piece: Piece, row: number, col: number): Move[] => {
     const moves: Move[] = [];
 
     const defaultRows = [1, 6];
@@ -361,7 +491,7 @@ export const Ajedrez = () => {
       if (!isInsideBoard(nextRow, col)) break;
 
       // si hay una pieza al frente, ya no puede seguir avanzando
-      if (!isEmptyCell(nextRow, col, gameBoard)) break;
+      if (!isEmptyCell(nextRow, col)) break;
 
       moves.push({ row: nextRow, col });
     }
@@ -389,7 +519,7 @@ export const Ajedrez = () => {
     const attackMoves = getPawnAttackMoves(piece, row, col);
 
     attackMoves.forEach((move) => {
-      if (isEnemyPiece(piece, move.row, move.col, gameBoard)) {
+      if (isEnemyPiece(piece, move.row, move.col)) {
         moves.push(move);
       }
     });
@@ -398,29 +528,24 @@ export const Ajedrez = () => {
   };
 
   //obtener los movimientos
-  const getPossibleMoves = (
-    row: number,
-    col: number,
-    gameBoard = board,
-    includeCastling = true,
-  ): Move[] => {
-    const piece = gameBoard[row][col];
+  const getPossibleMoves = (row: number, col: number): Move[] => {
+    const piece = board[row][col];
 
     if (!piece) return [];
     //casos
     switch (piece.type) {
       case "C":
-        return moveHorse(piece, row, col, gameBoard);
+        return moveHorse(piece, row, col);
       case "R":
-        return moveKing(piece, row, col, includeCastling, gameBoard);
+        return moveKing(piece, row, col);
       case "D":
-        return moveQueen(piece, row, col, gameBoard);
+        return moveQueen(piece, row, col);
       case "T":
-        return moveTower(piece, row, col, gameBoard);
+        return moveTower(piece, row, col);
       case "A":
-        return moveBishop(piece, row, col, gameBoard);
+        return moveBishop(piece, row, col);
       case "P":
-        return movePawn(piece, row, col, gameBoard);
+        return movePawn(piece, row, col);
       default:
         return [];
     }
@@ -433,16 +558,6 @@ export const Ajedrez = () => {
 
     const capturedPiece = newBoard[toRow][toCol];
 
-    if (capturedPiece?.color === pieceSelected.piece.color) {
-      setPieceSelected(null);
-      return;
-    }
-
-    if (capturedPiece?.type === "R") {
-      setPieceSelected(null);
-      return;
-    }
-
     if (capturedPiece) {
       if (pieceSelected.piece.color === "white") {
         setCapturedBlack((prev) => [...prev, capturedPiece]);
@@ -453,64 +568,37 @@ export const Ajedrez = () => {
 
     newBoard[toRow][toCol] = pieceSelected.piece;
     newBoard[pieceSelected.row][pieceSelected.col] = null;
-    const isCastling =
+
+    //enroque
+    const isCastlingMove =
       pieceSelected.piece.type === "R" &&
       Math.abs(toCol - pieceSelected.col) === 2;
 
-    if (isCastling) {
-      // enroque izquierda
-      if (toCol < pieceSelected.col) {
-        newBoard[toRow][toCol + 1] = newBoard[toRow][0];
-        newBoard[toRow][0] = null;
-      }
+    if (isCastlingMove) {
+      const row = pieceSelected.row;
+      const isShortCastle = toCol > pieceSelected.col;
 
-      // enroque derecha
-      if (toCol > pieceSelected.col) {
-        newBoard[toRow][toCol - 1] = newBoard[toRow][7];
-        newBoard[toRow][7] = null;
-      }
+      const rookFromCol = isShortCastle ? 7 : 0;
+      const rookToCol = isShortCastle ? 5 : 3;
+
+      newBoard[row][rookToCol] = newBoard[row][rookFromCol];
+      newBoard[row][rookFromCol] = null;
     }
 
-    setHasMoved((prev) => {
-      const next = { ...prev };
+    setCastling((prev: any) => {
+      const color = pieceSelected.piece.color;
+      const next = {
+        ...prev,
+        [color]: { ...prev[color] },
+      };
 
       if (pieceSelected.piece.type === "R") {
-        if (pieceSelected.piece.color === "white") {
-          next.whiteKing = true;
-        } else {
-          next.blackKing = true;
-        }
+        next[color].kingMoved = true;
       }
 
       if (pieceSelected.piece.type === "T") {
-        if (
-          pieceSelected.piece.color === "white" &&
-          pieceSelected.row === 7 &&
-          pieceSelected.col === 0
-        ) {
-          next.whiteLeftTower = true;
-        }
-        if (
-          pieceSelected.piece.color === "white" &&
-          pieceSelected.row === 7 &&
-          pieceSelected.col === 7
-        ) {
-          next.whiteRightTower = true;
-        }
-        if (
-          pieceSelected.piece.color === "black" &&
-          pieceSelected.row === 0 &&
-          pieceSelected.col === 0
-        ) {
-          next.blackLeftTower = true;
-        }
-        if (
-          pieceSelected.piece.color === "black" &&
-          pieceSelected.row === 0 &&
-          pieceSelected.col === 7
-        ) {
-          next.blackRightTower = true;
-        }
+        if (pieceSelected.col === 0) next[color].leftRookMoved = true;
+        if (pieceSelected.col === 7) next[color].rightRookMoved = true;
       }
 
       return next;
@@ -545,17 +633,21 @@ export const Ajedrez = () => {
       return;
     }
 
-    const suggestions = getLegalMovesForPiece(row, col);
+    let suggestions = getPossibleMoves(row, col);
+    suggestions = suggestions.filter(
+      (move) => !movementLeavesKingInCheck(row, col, move.row, move.col, turn),
+    );
+    console.log({ suggestions, piece });
 
     setPieceSelected({ piece, row, col, suggestions });
   };
 
   //Rey en Jaque
   //encontar al rey
-  const findKing = (color: PieceColor, gameBoard = board) => {
+  const findKing = (color: PieceColor) => {
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
-        const piece = gameBoard[row][col];
+        const piece = board[row][col];
 
         if (piece?.type === "R" && piece.color === color) {
           return { row, col };
@@ -577,259 +669,161 @@ export const Ajedrez = () => {
       { row: row + direction, col: col + 1 },
     ].filter((move) => isInsideBoard(move.row, move.col));
   };
-  const isSquareAttacked = (
-    targetRow: number,
-    targetCol: number,
-    byColor: PieceColor,
-    gameBoard = board,
-  ) => {
-    const horseMoves = [
-      { row: -2, col: -1 },
-      { row: -2, col: 1 },
-      { row: -1, col: -2 },
-      { row: -1, col: 2 },
-      { row: 1, col: -2 },
-      { row: 1, col: 2 },
-      { row: 2, col: -1 },
-      { row: 2, col: 1 },
-    ];
+  //ataque
+  const getAttackMoves = (row: number, col: number): Move[] => {
+    const piece = board[row][col];
 
-    const kingMoves = [
-      { row: -1, col: -1 },
-      { row: -1, col: 0 },
-      { row: -1, col: 1 },
-      { row: 0, col: -1 },
-      { row: 0, col: 1 },
-      { row: 1, col: -1 },
-      { row: 1, col: 0 },
-      { row: 1, col: 1 },
-    ];
+    if (!piece) return [];
 
-    const towerDirections = [
-      { row: -1, col: 0 },
-      { row: 1, col: 0 },
-      { row: 0, col: -1 },
-      { row: 0, col: 1 },
-    ];
-
-    const bishopDirections = [
-      { row: -1, col: -1 },
-      { row: -1, col: 1 },
-      { row: 1, col: -1 },
-      { row: 1, col: 1 },
-    ];
-
-    const isAttackingWithRay = (
-      row: number,
-      col: number,
-      directions: Move[],
-    ) => {
-      for (const direction of directions) {
-        for (let distance = 1; distance < 8; distance++) {
-          const nextRow = row + direction.row * distance;
-          const nextCol = col + direction.col * distance;
-
-          if (!isInsideBoard(nextRow, nextCol)) break;
-
-          if (nextRow === targetRow && nextCol === targetCol) return true;
-
-          if (gameBoard[nextRow][nextCol] !== null) break;
-        }
-      }
-
-      return false;
-    };
-
-    for (let row = 0; row < 8; row++) {
-      for (let col = 0; col < 8; col++) {
-        const piece = gameBoard[row][col];
-
-        if (!piece || piece.color !== byColor) continue;
-
-        if (
-          piece.type === "P" &&
-          getPawnAttackMoves(piece, row, col).some(
-            (move) => move.row === targetRow && move.col === targetCol,
-          )
-        ) {
-          return true;
-        }
-
-        if (
-          piece.type === "C" &&
-          horseMoves.some(
-            (move) =>
-              row + move.row === targetRow && col + move.col === targetCol,
-          )
-        ) {
-          return true;
-        }
-
-        if (
-          piece.type === "R" &&
-          kingMoves.some(
-            (move) =>
-              row + move.row === targetRow && col + move.col === targetCol,
-          )
-        ) {
-          return true;
-        }
-
-        if (
-          (piece.type === "T" || piece.type === "D") &&
-          isAttackingWithRay(row, col, towerDirections)
-        ) {
-          return true;
-        }
-
-        if (
-          (piece.type === "A" || piece.type === "D") &&
-          isAttackingWithRay(row, col, bishopDirections)
-        ) {
-          return true;
-        }
-      }
+    if (piece.type === "P") {
+      return getPawnAttackMoves(piece, row, col);
     }
 
-    return false;
+    return getPossibleMoves(row, col);
   };
 
   // funcion que detecta el jaque
-
-  const isKingInCheck = (color: PieceColor, gameBoard = board) => {
-    const kingPosition = findKing(color, gameBoard);
+  const isKingInCheck = (color: PieceColor) => {
+    const kingPosition = findKing(color);
 
     if (!kingPosition) return false;
 
     const enemyColor = color === "white" ? "black" : "white";
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const currentCell = board[row][col];
+        const piece =
+          Object.keys(currentCell || {}).length === 0 ? null : currentCell;
+        if (!piece || (piece && piece.color !== enemyColor)) continue;
 
-    return isSquareAttacked(
-      kingPosition.row,
-      kingPosition.col,
-      enemyColor,
-      gameBoard,
-    );
+        {
+          const attackMoves = getAttackMoves(row, col);
+          const isThreateningKing = attackMoves.some(
+            (move) =>
+              move.row === kingPosition.row && move.col === kingPosition.col,
+          );
+
+          console.log({ piece, row, col, attackMoves, isThreateningKing });
+          if (isThreateningKing) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   };
 
-  const getLegalMovesForPiece = (
-    row: number,
-    col: number,
-    gameBoard = board,
-  ) => {
-    const piece = gameBoard[row][col];
+  //   useEffect(() => {
+  //     if (isCheckmate("white")) {
+  //       setMessage("Jaque mate al rey Blanco. ¡Gana Negro!");
+  //       setIsRunning(false);
+  //       return;
+  //     }
 
-    if (!piece) return [];
+  //     if (isCheckmate("black")) {
+  //       setMessage("Jaque mate al rey Negro. ¡Gana Blanco!");
+  //       setIsRunning(false);
+  //       return;
+  //     }
 
-    const moves = getPossibleMoves(row, col, gameBoard);
+  //     if (isKingInCheck("white")) {
+  //       setMessage("Jaque al rey Blanco");
+  //     } else if (isKingInCheck("black")) {
+  //       setMessage("Jaque al rey Negro");
+  //     } else {
+  //       setMessage("");
+  //     }
+  //   }, [board]);
 
-    return moves.filter((move) => {
-      const target = gameBoard[move.row][move.col];
+  //que pieza esta dando jaque
+  const getCheckingPieces = (color: PieceColor): Move[] => {
+    const kingPosition = findKing(color);
 
-      if (target?.color === piece.color) return false;
-      if (target?.type === "R") return false;
+    if (!kingPosition) return [];
 
-      const newBoard = gameBoard.map((row) => [...row]);
-
-      newBoard[move.row][move.col] = piece;
-      newBoard[row][col] = null;
-
-      return !isKingInCheck(piece.color, newBoard);
-    });
-  };
-  //jaque mate
-  const isCheckmate = (color: PieceColor) => {
-    if (!isKingInCheck(color, board)) return false;
+    const enemyColor = color === "white" ? "black" : "white";
+    const threats: Move[] = [];
 
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         const piece = board[row][col];
 
+        if (!piece || piece.color !== enemyColor) continue;
+
+        const attackMoves = getAttackMoves(row, col);
+
+        const isThreateningKing = attackMoves.some(
+          (move) =>
+            move.row === kingPosition.row && move.col === kingPosition.col,
+        );
+
+        if (isThreateningKing) {
+          threats.push({ row, col });
+        }
+      }
+    }
+
+    return threats;
+  };
+  //jaque mate
+  // Simula un movimiento y evalúa si el rey sigue en jaque
+  const movementLeavesKingInCheck = (
+    fromRow: number,
+    fromCol: number,
+    toRow: number,
+    toCol: number,
+    color: PieceColor,
+  ): boolean => {
+    const newBoard = board;
+    const originalSource = { ...newBoard[fromRow][fromCol] } as Cell;
+    const originalTarget = { ...newBoard[toRow][toCol] } as Cell;
+
+    newBoard[toRow][toCol] = originalSource;
+    newBoard[fromRow][fromCol] = null;
+    let checkingAfterMove = false;
+    if (toRow === 4 && toCol === 2) {
+      checkingAfterMove = isKingInCheck(color);
+      console.log({
+        checkingAfterMove,
+        fromRow,
+        fromCol,
+        toRow,
+        toCol,
+        newBoard,
+      });
+    }
+
+    newBoard[fromRow][fromCol] = originalSource;
+    newBoard[toRow][toCol] =
+      Object.keys(originalTarget || {}).length === 0 ? null : originalTarget;
+
+    return checkingAfterMove;
+  };
+
+  const isCheckmate = (color: PieceColor): boolean => {
+    if (!isKingInCheck(color)) return false;
+
+    //movimiento que salve al rey
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const piece = board[r][c];
+
         if (!piece || piece.color !== color) continue;
 
-        if (getLegalMovesForPiece(row, col).length > 0) return false;
+        const possibleMoves = getPossibleMoves(r, c);
+
+        const hasEscapeRoute = possibleMoves.some(
+          (move) => !movementLeavesKingInCheck(r, c, move.row, move.col, color),
+        );
+
+        if (hasEscapeRoute) {
+          return false; //jugador encontro una escapatoria legal
+        }
       }
     }
 
     return true;
   };
-  useEffect(() => {
-    const whiteInCheckmate = isCheckmate("white");
-    const blackInCheckmate = isCheckmate("black");
-    const whiteInCheck = isKingInCheck("white");
-    const blackInCheck = isKingInCheck("black");
-
-    if (whiteInCheckmate) {
-      setMessage("Jaque mate al rey Blanco");
-      setIsRunning(false);
-    } else if (blackInCheckmate) {
-      setMessage("Jaque mate al rey Negro");
-      setIsRunning(false);
-    } else if (whiteInCheck) {
-      setMessage("Jaque al rey Blanco");
-    } else if (blackInCheck) {
-      setMessage("Jaque al rey Negro");
-    } else {
-      setMessage("");
-    }
-  }, [board]);
-
-  //Enroque
-  const getCastlingMoves = (piece: Piece, row: number, col: number): Move[] => {
-    const moves: Move[] = [];
-
-    if (piece.type !== "R") return moves;
-    if (isKingInCheck(piece.color)) return moves;
-
-    const isWhite = piece.color === "white";
-    const kingStartRow = isWhite ? 7 : 0;
-    const kingStartCol = 4;
-
-    if (row !== kingStartRow || col !== kingStartCol) return moves;
-
-    const enemyColor = isWhite ? "black" : "white";
-    const kingMoved = isWhite ? hasMoved.whiteKing : hasMoved.blackKing;
-
-    if (kingMoved) return moves;
-
-    const leftTowerMoved = isWhite
-      ? hasMoved.whiteLeftTower
-      : hasMoved.blackLeftTower;
-
-    const rightTowerMoved = isWhite
-      ? hasMoved.whiteRightTower
-      : hasMoved.blackRightTower;
-
-
-    // Enroque hacia la izquierda
-    if (
-      !leftTowerMoved &&
-      board[row][0]?.type === "T" &&
-      board[row][0]?.color === piece.color &&
-      board[row][1] === null &&
-      board[row][2] === null &&
-      board[row][3] === null &&
-      !isSquareAttacked(row, 3, enemyColor) &&
-      !isSquareAttacked(row, 2, enemyColor)
-    ) {
-      moves.push({ row, col: 2 });
-    }
-
-    // Enroque hacia la derecha
-    if (
-      !rightTowerMoved &&
-      board[row][7]?.type === "T" &&
-      board[row][7]?.color === piece.color &&
-      board[row][5] === null &&
-      board[row][6] === null &&
-      !isSquareAttacked(row, 5, enemyColor) &&
-      !isSquareAttacked(row, 6, enemyColor)
-    ) {
-      moves.push({ row, col: 6 });
-    }
-
-    return moves;
-  };
-
 
   // Cronometro
   useEffect(() => {
@@ -865,8 +859,20 @@ export const Ajedrez = () => {
     setCapturedBlack([]);
     setWhiteTime(0);
     setBlackTime(0);
-    setHasMoved(initialHasMoved);
     setIsRunning(true);
+    setCastling({
+      white: {
+        kingMoved: false,
+        leftRookMoved: false,
+        rightRookMoved: false,
+      },
+      black: {
+        kingMoved: false,
+        leftRookMoved: false,
+        rightRookMoved: false,
+      },
+    });
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
   };
   //iniciar
   const startBoard = () => {
@@ -882,8 +888,19 @@ export const Ajedrez = () => {
     setCapturedBlack([]);
     setWhiteTime(0);
     setBlackTime(0);
-    setHasMoved(initialHasMoved);
     setIsRunning(false);
+    setCastling({
+      white: {
+        kingMoved: false,
+        leftRookMoved: false,
+        rightRookMoved: false,
+      },
+      black: {
+        kingMoved: false,
+        leftRookMoved: false,
+        rightRookMoved: false,
+      },
+    });
   };
   // funcion render
   const pieceRender = (cell: Cell) => {
@@ -894,9 +911,47 @@ export const Ajedrez = () => {
         `${cell?.type}${cell?.color && cell.color == "white" ? "" : "+"}`)
     );
   };
+
+  useEffect(() => {
+    const gameState = {
+      board,
+      turn,
+      capturedWhite,
+      capturedBlack,
+      whiteTime,
+      blackTime,
+      isRunning,
+      castling,
+    };
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(gameState));
+  }, [
+    board,
+    turn,
+    capturedWhite,
+    capturedBlack,
+    whiteTime,
+    blackTime,
+    isRunning,
+    castling,
+  ]);
+  useEffect(() => {
+    const savedGame = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!savedGame) return;
+
+    const parsedGame = JSON.parse(savedGame);
+
+    setBoard(parsedGame.board);
+    setTurn(parsedGame.turn);
+    setCapturedWhite(parsedGame.capturedWhite);
+    setCapturedBlack(parsedGame.capturedBlack);
+    setWhiteTime(parsedGame.whiteTime);
+    setBlackTime(parsedGame.blackTime);
+    setIsRunning(parsedGame.isRunning);
+    setCastling(parsedGame.castling);
+  }, []);
   return (
     <div className="mt-50">
-      <div className="absolute left-80 top-85 w-60 rounded-2xl text-center">
+      <div className="absolute left-80 top-85 w-60 rounded-2xl text-center flex">
         <p>Piezas blancas capturadas: </p>
         <div className="grid grid-cols-4 text-4xl ">
           {capturedWhite.map((piece) => pieceRender(piece)) || "Ninguna"}
@@ -909,8 +964,9 @@ export const Ajedrez = () => {
       <div className="flex justify-center items-center w-full">
         Tiempo: {formatTime(blackTime)}
       </div>
+
       {board.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex border">
+        <div key={rowIndex} className="flex border w-95">
           {row.map((cell, colIndex) => {
             const isWhite = (rowIndex + colIndex) % 2 === 0;
             const isPossibleMove = pieceSelected?.suggestions.some(
@@ -939,7 +995,7 @@ export const Ajedrez = () => {
       <div className="flex justify-center items-center w-full">
         Tiempo: {formatTime(whiteTime)}
       </div>
-      <div className="  absolute   rounded-2xl right-40 w-70">
+      <div className="  absolute   rounded-2xl right-40 w-70 flex">
         <p className="text-center">Piezas negras capturadas: </p>
         <div className="grid grid-cols-4 text-4xl">
           {capturedBlack.map((cell: Cell) => pieceRender(cell)) || "Ninguna"}
@@ -969,7 +1025,7 @@ export const Ajedrez = () => {
       <div className="relative top-10">
         {" "}
         {messaje && (
-          <p className="text-center font-bold text-[20px]">{messaje}</p>
+          <p className="text-center font-bold flex text-[20px]">{messaje}</p>
         )}
       </div>
     </div>
