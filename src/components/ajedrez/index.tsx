@@ -406,12 +406,13 @@ export const Ajedrez = () => {
         if (!isInsideBoard(newRow, newCol)) break;
         if (isEmptyCell(newRow, newCol, currentBoard)) {
           moves.push({ row: newRow, col: newCol });
-          continue;
+        } else {
+          if (isEnemyPiece(piece, newRow, newCol, currentBoard)) {
+            moves.push({ row: newRow, col: newCol });
+          }
+          break;
         }
-        if (isEnemyPiece(piece, newRow, newCol, currentBoard)) {
-          moves.push({ row: newRow, col: newCol });
-        }
-        break;
+        i++;
       }
     }
 
@@ -506,28 +507,7 @@ export const Ajedrez = () => {
     const newBoard = board.map((row) => [...row]);
 
     const capturedPiece = newBoard[toRow][toCol];
-    if (capturedPiece?.type === "T") {
-      setCastling((prev: any) => {
-        const next = {
-          ...prev,
-          [capturedPiece.color]: {
-            ...prev[capturedPiece.color],
-          },
-        };
 
-        // torre izquierda
-        if (toCol === 0) {
-          next[capturedPiece.color].leftRookMoved = true;
-        }
-
-        // torre derecha
-        if (toCol === 7) {
-          next[capturedPiece.color].rightRookMoved = true;
-        }
-
-        return next;
-      });
-    }
     if (capturedPiece) {
       if (pieceSelected.piece.color === "white") {
         setCapturedBlack((prev) => [...prev, capturedPiece]);
@@ -679,17 +659,6 @@ export const Ajedrez = () => {
     //  color del enemigo
     const enemyColor = color === "white" ? "black" : "white";
 
-    const enemyKingPosition = findKing(enemyColor, currentBoard);
-    if (enemyKingPosition) {
-      const rowDistance = Math.abs(kingPosition.row - enemyKingPosition.row);
-      const colDistance = Math.abs(kingPosition.col - enemyKingPosition.col);
-
-      //  jaque
-      if (rowDistance <= 1 && colDistance <= 1) {
-        return true;
-      }
-    }
-
     //  ataques del enemigo
     const enemyAttacks = getSquaresAttackedByColor(enemyColor, currentBoard);
 
@@ -745,7 +714,11 @@ export const Ajedrez = () => {
         }
       }
     }
-    const simulatedBoard = board.map((row) => [...row]);
+
+    //  simulación
+    const simulatedBoard = board.map((row) =>
+      row.map((cell) => (cell ? { ...cell } : null)),
+    );
 
     simulatedBoard[toRow][toCol] = simulatedBoard[fromRow][fromCol];
     simulatedBoard[fromRow][fromCol] = null;
@@ -789,7 +762,7 @@ export const Ajedrez = () => {
       for (let col = 0; col < 8; col++) {
         const piece = currentBoard[row][col];
 
-        // Si la pieza pertenece al color atacante, guardamos sus objetivos
+        // Si la pieza pertenece al color atacante  guardamos sus objetivos
         if (piece && piece.color === color) {
           const attacks = getAttackMoves(row, col, currentBoard);
           attackedSquares.push(...attacks);
@@ -949,7 +922,6 @@ export const Ajedrez = () => {
 
     return (
       <>
-        {" "}
         <div className="flex flex-row text-2xl ml-11.5">
           <span className={letter}>a</span>
           <span className={letter}>b</span>
@@ -965,136 +937,166 @@ export const Ajedrez = () => {
   };
 
   return (
-    <div className="mt-50">
-      <div className="absolute left-80 top-85 w-60  rounded-2xl text-center flex">
-        <p>Piezas blancas capturadas: </p>
-        <div className="grid grid-cols-4 text-4xl ">
-          {capturedWhite.map((piece) => pieceRender(piece)) || "Ninguna"}
+    <div>
+      <div className="mt-50 w-300 flex flex-row justify-center gap-5 ">
+        <div className=" rounded-2xl w-70 h-30 flex flex-col gap-2 bg-neutral-100 p-3 mt-2  shadow-sm">
+          <p className="font-semibold text-sm text-neutral-700">
+            Piezas blancas capturadas:
+          </p>
+          <div className="flex flex-wrap gap-1 text-4xl text-black">
+            {capturedWhite.length > 0 ? (
+              capturedWhite.map((cell: Cell, index) => (
+                <span
+                  key={index}
+                  className="inline-block transition-transform hover:scale-110"
+                >
+                  {pieceRender(cell)}
+                </span>
+              ))
+            ) : (
+              <span className="text-sm text-neutral-400 italic pt-2">
+                Ninguna
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="p-4">
-        <p className="font-bold font-mono text-[30px] text-center">Ajedrez</p>
-        <p className="mt-2 text-center">Turno de "{turn}"</p>
-      </div>
-      <div className="flex justify-center items-center w-full">
-        Tiempo: {formatTime(blackTime)}
-      </div>
-      <BoxLetter></BoxLetter>
-      <div className="flex flex-row">
-        <BoxNumber></BoxNumber>
-        <div>
-          <div>
+        <div className="w-120 ">
+          <div className="p-4">
+            <p className="font-bold font-mono text-[30px] text-center">
+              Ajedrez
+            </p>
+            <p className="mt-2 text-center">Turno de "{turn}"</p>
+          </div>
+          <div className="flex justify-center items-center  ">
+            <div className="flex justify-center w-40 text-white bg-gray-500 border border-gray-400 rounded-2xl shadow-sm ">
+              Tiempo: {formatTime(blackTime)}
+            </div>
+          </div>
+          <BoxLetter></BoxLetter>
+          <div className="flex flex-row">
+            <BoxNumber></BoxNumber>
             <div>
-              {board.map((row, rowIndex) => {
-                const enemyColor = turn === "white" ? "black" : "white";
-                const enemyThreats = getSquaresAttackedByColor(
-                  enemyColor,
-                  board,
-                );
+              <div>
+                <div>
+                  {board.map((row, rowIndex) => {
+                    const enemyColor = turn === "white" ? "black" : "white";
+                    const enemyThreats = getSquaresAttackedByColor(
+                      enemyColor,
+                      board,
+                    );
 
-                return (
-                  <div key={rowIndex} className="flex border w-95">
-                    {row.map((cell, colIndex) => {
-                      const isWhite = (rowIndex + colIndex) % 2 === 0;
-                      const isPossibleMove = pieceSelected?.suggestions.some(
-                        (move) =>
-                          move.row === rowIndex && move.col === colIndex,
-                      );
+                    return (
+                      <div key={rowIndex} className="flex border w-95">
+                        {row.map((cell, colIndex) => {
+                          const isWhite = (rowIndex + colIndex) % 2 === 0;
+                          const isPossibleMove =
+                            pieceSelected?.suggestions.some(
+                              (move) =>
+                                move.row === rowIndex && move.col === colIndex,
+                            );
 
-                      const isSquareUnderAttack = enemyThreats.some(
-                        (threat) =>
-                          threat.row === rowIndex && threat.col === colIndex,
-                      );
+                          const isSquareUnderAttack = enemyThreats.some(
+                            (threat) =>
+                              threat.row === rowIndex &&
+                              threat.col === colIndex,
+                          );
 
-                      const isPieceThreatened =
-                        cell !== null &&
-                        cell.color === turn &&
-                        isSquareUnderAttack;
+                          const isPieceThreatened =
+                            cell !== null &&
+                            cell.color === turn &&
+                            isSquareUnderAttack;
 
-                      return (
-                        <button
-                          key={`${rowIndex}-${colIndex}`}
-                          className={`relative w-12 h-12 ${
-                            isWhite
-                              ? "bg-white text-black"
-                              : "bg-black text-white"
-                          }`}
-                          onClick={() => handleSelectPiece(rowIndex, colIndex)}
-                        >
-                          {isPieceThreatened && (
-                            <span className="absolute inset-0 bg-red-500/40 z-0"></span>
-                          )}
+                          return (
+                            <button
+                              key={`${rowIndex}-${colIndex}`}
+                              className={`relative w-12 h-12 ${
+                                isWhite
+                                  ? "bg-white text-black"
+                                  : "bg-black text-white"
+                              }`}
+                              onClick={() =>
+                                handleSelectPiece(rowIndex, colIndex)
+                              }
+                            >
+                              º
+                              {isPieceThreatened && (
+                                <span className="absolute inset-0 bg-red-500/40 z-0"></span>
+                              )}
+                              {isPossibleMove && (
+                                <span className="absolute inset-0 bg-green-400/40 z-0"></span>
+                              )}
+                              <span className="relative z-10 text-4xl">
+                                {pieceRender(cell)}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            <BoxNumber></BoxNumber>
+          </div>
 
-                          {isPossibleMove && (
-                            <span className="absolute inset-0 bg-green-400/40 z-0"></span>
-                          )}
-
-                          <span className="relative z-10 text-4xl">
-                            {pieceRender(cell)}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                );
-              })}
+          <BoxLetter></BoxLetter>
+          <div className="flex justify-center items-center ">
+            <div className="flex justify-center items-center w-40 bg-gray-500 border border-gray-400 rounded-2xl text-white shadow-sm ">
+              Tiempo: {formatTime(whiteTime)}
+            </div>
+          </div>
+          <div className="flex justify-center mt-5">
+            <button
+              className="w-25 h-10 left-35 bg-green-600 text-white border border-green-500 hover:bg-green-500 rounded-md"
+              onClick={startBoard}
+            >
+              Start
+            </button>
+            <button
+              className="w-25 h-10 left-35 bg-amber-500 border text-white border-amber-400 hover:bg-amber-400 rounded-md"
+              onClick={resetBoard}
+            >
+              Reset
+            </button>
+            <button
+              className="w-25 h-10 left-35 bg-red-600 text-white border border-red-500 hover:bg-red-500 rounded-md"
+              onClick={finish}
+            >
+              Terminar
+            </button>
+          </div>
+          <div className="top-10 flex justify-center mt-4 bg-amber-100 border border-amber-100 rounded-2xl  ">
+            {messaje && (
+              <p className="text-center font-bold flex text-[20px]">
+                {messaje}
+              </p>
+            )}
+          </div>
+        </div>
+        <div>
+          <div className=" rounded-2xl w-70 h-30 flex flex-col gap-2 bg-neutral-100 p-3 shadow-sm mt-2 mr-2 ">
+            <p className="font-semibold text-sm text-neutral-700">
+              Piezas negras capturadas:
+            </p>
+            <div className="flex flex-wrap gap-1 text-4xl text-black">
+              {capturedBlack.length > 0 ? (
+                capturedBlack.map((cell: Cell, index) => (
+                  <span
+                    key={index}
+                    className="inline-block transition-transform hover:scale-110"
+                  >
+                    {pieceRender(cell)}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-neutral-400 italic pt-2">
+                  Ninguna
+                </span>
+              )}
             </div>
           </div>
         </div>
-        <BoxNumber></BoxNumber>
-      </div>
-
-      <BoxLetter></BoxLetter>
-      <div className="flex justify-center items-center w-full">
-        Tiempo: {formatTime(whiteTime)}
-      </div>
-      <div className="absolute rounded-2xl right-40 w-70 flex flex-col gap-2 bg-neutral-100 p-3 shadow-sm">
-        <p className="font-semibold text-sm text-neutral-700">
-          Piezas negras capturadas:
-        </p>
-        <div className="flex flex-wrap gap-1 text-4xl text-black">
-          {capturedBlack.length > 0 ? (
-            capturedBlack.map((cell: Cell, index) => (
-              <span
-                key={index}
-                className="inline-block transition-transform hover:scale-110"
-              >
-                {pieceRender(cell)}
-              </span>
-            ))
-          ) : (
-            <span className="text-sm text-neutral-400 italic pt-2">
-              Ninguna
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="flex justify-center mt-2">
-        <button
-          className="w-25 h-10 left-35 bg-amber-400 border border-amber-100 hover:bg-amber-300 rounded-md"
-          onClick={startBoard}
-        >
-          Start
-        </button>
-        <button
-          className="w-25 h-10 left-35 bg-amber-400 border border-amber-100 hover:bg-amber-300 rounded-md"
-          onClick={resetBoard}
-        >
-          Reset
-        </button>
-        <button
-          className="w-25 h-10 left-35 bg-amber-400 border border-amber-100 hover:bg-amber-300 rounded-md"
-          onClick={finish}
-        >
-          Terminar
-        </button>
-      </div>
-
-      <div className="relative top-10">
-        {" "}
-        {messaje && (
-          <p className="text-center font-bold flex text-[20px]">{messaje}</p>
-        )}
       </div>
     </div>
   );
