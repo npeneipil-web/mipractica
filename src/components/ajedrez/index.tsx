@@ -398,7 +398,9 @@ export const Ajedrez = () => {
     ];
 
     for (const d of directions) {
-      for (let i = 1; i < 8; i++) {
+      let i = 1;
+
+      while (true) {
         const newRow = row + d.r * i;
         const newCol = col + d.c * i;
         if (!isInsideBoard(newRow, newCol)) break;
@@ -650,16 +652,31 @@ export const Ajedrez = () => {
     if (piece.type === "P") {
       return getPawnAttackMoves(piece, row, col);
     }
+    if (piece.type === "R") {
+      const kingMoves = [
+        { row: row - 1, col: col - 1 },
+        { row: row - 1, col },
+        { row: row - 1, col: col + 1 },
+        { row, col: col - 1 },
+        { row, col: col + 1 },
+        { row: row + 1, col: col - 1 },
+        { row: row + 1, col },
+        { row: row + 1, col: col + 1 },
+      ];
+      //  casilla este dentro del tablero de 8x8
+      return kingMoves.filter((move) => isInsideBoard(move.row, move.col));
+    }
 
     return getPossibleMoves(row, col, currentBoard);
   };
-
   // funcion que detecta el jaque
   const isKingInCheck = (color: PieceColor, currentBoard: Cell[][] = board) => {
+    // posición del rey
     const kingPosition = findKing(color, currentBoard);
 
     if (!kingPosition) return false;
 
+    //  color del enemigo
     const enemyColor = color === "white" ? "black" : "white";
 
     const enemyKingPosition = findKing(enemyColor, currentBoard);
@@ -673,28 +690,15 @@ export const Ajedrez = () => {
       }
     }
 
-    for (let row = 0; row < 8; row++) {
-      for (let col = 0; col < 8; col++) {
-        const currentCell = currentBoard[row][col];
-        const piece =
-          Object.keys(currentCell || {}).length === 0 ? null : currentCell;
-        if (!piece || (piece && piece.color !== enemyColor)) continue;
+    //  ataques del enemigo
+    const enemyAttacks = getSquaresAttackedByColor(enemyColor, currentBoard);
 
-        {
-          const attackMoves = getAttackMoves(row, col, currentBoard);
-          const isThreateningKing = attackMoves.some(
-            (move) =>
-              move.row === kingPosition.row && move.col === kingPosition.col,
-          );
+    // jaque si esta dentro del radar enemigo
+    const kingIsThreatened = enemyAttacks.some(
+      (move) => move.row === kingPosition.row && move.col === kingPosition.col,
+    );
 
-          console.log({ piece, row, col, attackMoves, isThreateningKing });
-          if (isThreateningKing) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
+    return kingIsThreatened;
   };
 
   useEffect(() => {
@@ -720,7 +724,7 @@ export const Ajedrez = () => {
   }, [board]);
 
   //jaque mate
-  // Simula un movimiento y evalúa si el rey sigue en jaque
+  // Simula un movimiento y evalu si el rey sigue en jaque
   const movementLeavesKingInCheck = (
     fromRow: number,
     fromCol: number,
@@ -728,6 +732,19 @@ export const Ajedrez = () => {
     toCol: number,
     color: PieceColor,
   ): boolean => {
+    // proximidad antes de simular la captura
+    const movingPiece = board[fromRow][fromCol];
+    if (movingPiece && movingPiece.type === "R") {
+      const enemyColor = color === "white" ? "black" : "white";
+      const enemyKingPos = findKing(enemyColor, board);
+      if (enemyKingPos) {
+        const rowDist = Math.abs(toRow - enemyKingPos.row);
+        const colDist = Math.abs(toCol - enemyKingPos.col);
+        if (rowDist <= 1 && colDist <= 1) {
+          return true; // el rey no puede acercarse al otro rey
+        }
+      }
+    }
     const simulatedBoard = board.map((row) => [...row]);
 
     simulatedBoard[toRow][toCol] = simulatedBoard[fromRow][fromCol];
@@ -772,7 +789,7 @@ export const Ajedrez = () => {
       for (let col = 0; col < 8; col++) {
         const piece = currentBoard[row][col];
 
-        // Si la pieza pertenece al color atacante guardamos sus objetivos
+        // Si la pieza pertenece al color atacante, guardamos sus objetivos
         if (piece && piece.color === color) {
           const attacks = getAttackMoves(row, col, currentBoard);
           attackedSquares.push(...attacks);
@@ -1031,10 +1048,25 @@ export const Ajedrez = () => {
       <div className="flex justify-center items-center w-full">
         Tiempo: {formatTime(whiteTime)}
       </div>
-      <div className="  absolute   rounded-2xl right-40 w-70 flex">
-        <p className="text-center">Piezas negras capturadas: </p>
-        <div className="grid grid-cols-4 text-4xl">
-          {capturedBlack.map((cell: Cell) => pieceRender(cell)) || "Ninguna"}
+      <div className="absolute rounded-2xl right-40 w-70 flex flex-col gap-2 bg-neutral-100 p-3 shadow-sm">
+        <p className="font-semibold text-sm text-neutral-700">
+          Piezas negras capturadas:
+        </p>
+        <div className="flex flex-wrap gap-1 text-4xl text-black">
+          {capturedBlack.length > 0 ? (
+            capturedBlack.map((cell: Cell, index) => (
+              <span
+                key={index}
+                className="inline-block transition-transform hover:scale-110"
+              >
+                {pieceRender(cell)}
+              </span>
+            ))
+          ) : (
+            <span className="text-sm text-neutral-400 italic pt-2">
+              Ninguna
+            </span>
+          )}
         </div>
       </div>
       <div className="flex justify-center mt-2">
