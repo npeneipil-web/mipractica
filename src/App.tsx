@@ -18,30 +18,36 @@ import { Article } from "./components/exercise-super";
 import { Calculator } from "./components/examples/calculator";
 import { Cat } from "./components/cat/index";
 import { Ajedrez } from "./components/ajedrez";
+import Prism from "prismjs";
+window.Prism = Prism;
+import { Outlier } from "@outlier-spa/component";
+const { ThemeProvider } = Outlier;
 
 function App() {
   return (
-    <BrouserRouter>
-      <Home>
-        <Routes>
-          <Route path="/" element={<>Bienvenido a mi práctica</>} />
-          <Route path="/employee" element={<PresentationLetter />} />
-          <Route path="/404" element={<ErrorPage />} />
-          <Route path="/input-form" element={<InputFormPage />} />
-          <Route path="/pokeapi" element={<PokeApiPage />} />
-          <Route path="/calculadora" element={<CalculadoraTable />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/lorempicsum" element={<LoremPicsumPage />} />
-          <Route path="/practica" element={<Presentations />} />
-          <Route path="/articulos" element={<Article />} />
-          <Route path="/calculator" element={<Calculator />} />
-          <Route path="/cat" element={<Cat />} />
-          <Route path="/ajedrez" element={<Ajedrez />} />
+    <ThemeProvider defaultTheme="light">
+      <BrouserRouter>
+        <Home>
+          <Routes>
+            <Route path="/" element={<>Bienvenido a mi práctica</>} />
+            <Route path="/employee" element={<PresentationLetter />} />
+            <Route path="/404" element={<ErrorPage />} />
+            <Route path="/input-form" element={<InputFormPage />} />
+            <Route path="/pokeapi" element={<PokeApiPage />} />
+            <Route path="/calculadora" element={<CalculadoraTable />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/lorempicsum" element={<LoremPicsumPage />} />
+            <Route path="/practica" element={<Presentations />} />
+            <Route path="/articulos" element={<Article />} />
+            <Route path="/calculator" element={<Calculator />} />
+            <Route path="/cat" element={<Cat />} />
+            <Route path="/ajedrez" element={<Ajedrez />} />
 
-          <Route path="*" element={<Navigate to="/404" />} />
-        </Routes>
-      </Home>
-    </BrouserRouter>
+            <Route path="*" element={<Navigate to="/404" />} />
+          </Routes>
+        </Home>
+      </BrouserRouter>
+    </ThemeProvider>
   );
 }
 

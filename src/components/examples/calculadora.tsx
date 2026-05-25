@@ -13,13 +13,13 @@ interface InputCalPageP {
 }
 
 export const InputCalPage: React.FC<InputCalPageP> = ({ defaultNum }) => {
-  //num es un estado que se inicializa con el valor de defaultNum,
-  // que puede ser un número o undefined.
   const [num, setNum] = useState<number | undefined>(defaultNum);
 
+  const reset = () => {
+    setNum(() => 0);
+  };
+
   const sumar = () => {
-    //lo que hace esta función es actualizar el estado num sumándole 1 al valor actual.
-    //prev es el valor anterior de num, en caso de que num sea undefined,
     // se le asigna el valor 0 antes de sumarle 1.
     setNum((prev) => (prev ?? 0) + 1);
     // if (num !== undefined) setNum(num ?? 0 + 1); Forma tradicional
@@ -36,64 +36,61 @@ export const InputCalPage: React.FC<InputCalPageP> = ({ defaultNum }) => {
     setNum((prev) => (prev ?? 0) / 3);
     //if (num !== undefined) setNum(num / 3);
   };
+  const button =
+    " bg-[#ff9200] text-white border border-[#ff9200] rounded-2xl w-30 h-10";
 
   return (
-    <div>
-      <table>
-        <tbody>
-          <tr className=" bg-yellow-50">
-            <input
-              type="number"
-              placeholder="Ingrese numero"
-              value={num}
-              //Cuando el usuario cambia el valor del input, esta función toma ese nuevo valor,
-              //  lo convierte a número y actualiza el estado num
-              onChange={(e) => setNum(Number(e.target.value))}
-            />
-          </tr>
-
-          <tr className="w-100px h-100px bg-white">
-            <td>
-              <p>Suma</p>
-            </td>
-            <td>
-              <button className="w- bg-red-200" onClick={sumar}>
-                Sumar+1
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>Resta</p>
-            </td>
-            <td>
-              <button className="bg-green-200" onClick={restar}>
-                Restar-1
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>Multiplique</p>
-            </td>
-            <td>
-              <button className="bg-blue-200" onClick={multiplicar}>
-                Multiplique x2
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>Divida</p>
-            </td>
-            <td>
-              <button className="bg-yellow-400" onClick={dividir}>
-                Dividir en 3
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div className=" w-full  ">
+      <div className="flex w-full mt-30  justify-center items-center h-70  ">
+        <table className=" w-100  bg-[#252e32] justify-center items-center flex border rounded-2xl ">
+          <tbody className=" w-full h-full flex flex-col items-center">
+            <tr className=" bg-white mt-5 w-90 h-10 justify-center flex border rounded-2xl ">
+              <input
+                className="text-center w-full"
+                type="number"
+                placeholder="Ingrese numero"
+                value={num}
+                onChange={(e) => setNum(Number(e.target.value))}
+              />
+            </tr>
+            <tr className="w-15 mt-2 flex justify-center border rounded-2xl bg-amber-50">
+              <td className="">
+                <button onClick={reset}>Reset</button>
+              </td>
+            </tr>
+            <div className="flex flex-col gap-3 p-3 ">
+              <tr>
+                <td>
+                  <button className={button} onClick={sumar}>
+                    Sumar+1
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button className={button} onClick={restar}>
+                    Restar-1
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button className={button} onClick={multiplicar}>
+                    Multiplique x2
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button className={button} onClick={dividir}>
+                    Dividir en 3
+                  </button>
+                </td>
+              </tr>
+            </div>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

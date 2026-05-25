@@ -1,3 +1,4 @@
+import { Button } from "@outlier-spa/component";
 import { Link } from "react-router-dom";
 
 export const Home = ({ children }: React.PropsWithChildren) => {
@@ -45,6 +46,7 @@ export const Home = ({ children }: React.PropsWithChildren) => {
             Ajedrez
           </Link>
         </div>
+        <Button variant="danger">My button</Button>
         <div className="flex w-full bg-white justify-center">{children}</div>
       </div>
     </>
