@@ -51,9 +51,9 @@ const boardDefault: Cell[][] = [
     { type: "T", color: "black" },
     { type: "C", color: "black" },
     { type: "A", color: "black" },
-    null, //{ type: "D", color: "black" },
+    { type: "D", color: "black" },
     { type: "R", color: "black" },
-    null, //{ type: "A", color: "black" },
+    { type: "A", color: "black" },
     { type: "C", color: "black" },
     { type: "T", color: "black" },
   ],
@@ -63,13 +63,31 @@ const boardDefault: Cell[][] = [
     { type: "P", color: "black" },
     { type: "P", color: "black" },
     { type: "P", color: "black" },
-    { type: "P", color: "white" },
+    { type: "P", color: "black" },
     { type: "P", color: "black" },
     { type: "P", color: "black" },
   ],
-  [null, null, null, null, { type: "A", color: "black" }, null, null, null],
+  [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null, //{ type: "A", color: "black" },
+    null,
+    null,
+  ],
   [null, null, null, { type: "R", color: "white" }, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
+  [
+    null,
+    null,
+    null,
+    { type: "T", color: "black" },
+    { type: "P", color: "white" },
+    null,
+    null,
+    null,
+  ],
   [null, null, null, null, null, null, null, null],
   [
     { type: "P", color: "white" },
@@ -86,8 +104,8 @@ const boardDefault: Cell[][] = [
     { type: "C", color: "white" },
     { type: "A", color: "white" },
     { type: "D", color: "white" }, //{ type: "D", color: "white" },
-    // { type: "R", color: "white" },
-    null,
+    null, //{ type: "R", color: "white" },
+
     { type: "A", color: "white" },
     { type: "C", color: "white" },
     { type: "T", color: "white" },
@@ -128,17 +146,18 @@ export const Ajedrez = () => {
   //mensaje en jaque
   const [messaje, setMessage] = useState("");
 
+  const playTime = 20 * 60 * 1000;
   //tiempo por jugador
   const [whiteTime, setWhiteTime] = useState<number>(() => {
-    if (typeof window === "undefined") return 0;
+    if (typeof window === "undefined") return playTime;
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return saved ? JSON.parse(saved).whiteTime : 0;
+    return saved ? JSON.parse(saved).whiteTime : playTime;
   });
 
   const [blackTime, setBlackTime] = useState<number>(() => {
-    if (typeof window === "undefined") return 0;
+    if (typeof window === "undefined") return playTime;
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return saved ? JSON.parse(saved).blackTime : 0;
+    return saved ? JSON.parse(saved).blackTime : playTime;
   });
 
   const [isRunning, setIsRunning] = useState<boolean>(() => {
@@ -185,16 +204,30 @@ export const Ajedrez = () => {
     return row >= 0 && row < 8 && col >= 0 && col < 8;
   };
 
-  const isEmptyCell = (row: number, col: number) => {
-    return board[row][col] === null;
+  const isEmptyCell = (
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ) => {
+    return currentBoard[row][col] === null;
   };
 
-  const isEnemyPiece = (piece: Piece, row: number, col: number) => {
-    const target = board[row][col];
+  const isEnemyPiece = (
+    piece: Piece,
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ) => {
+    const target = currentBoard[row][col];
     return target !== null && target.color !== piece.color;
   };
-  const isFriendPiece = (piece: Piece, row: number, col: number) => {
-    const target = board[row][col];
+  const isFriendPiece = (
+    piece: Piece,
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ) => {
+    const target = currentBoard[row][col];
     return target !== null && target.color === piece.color;
   };
 
@@ -210,7 +243,12 @@ export const Ajedrez = () => {
   //VALIDACIONES DE CASILLAS
 
   // funcion rey
-  const moveKing = (piece: Piece, row: number, col: number) => {
+  const moveKing = (
+    piece: Piece,
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ) => {
     const moves = [
       { row: row - 1, col: col - 1 }, // diagonal izquierda abajo
       { row: row - 1, col }, // abajo
@@ -233,7 +271,7 @@ export const Ajedrez = () => {
     const validMoves = moves.filter((move) => {
       if (!isInsideBoard(move.row, move.col)) return false;
 
-      if (isFriendPiece(piece, move.row, move.col)) return false;
+      if (isFriendPiece(piece, move.row, move.col, currentBoard)) return false;
 
       return true;
     });
@@ -241,11 +279,11 @@ export const Ajedrez = () => {
       // enroque largo
       if (
         !castling[piece.color].leftRookMoved &&
-        isEmptyCell(row, col - 1) &&
-        isEmptyCell(row, col - 2) &&
-        isEmptyCell(row, col - 3) &&
-        board[row][0]?.type === "T" &&
-        board[row][0]?.color === piece.color
+        isEmptyCell(row, col - 1, currentBoard) &&
+        isEmptyCell(row, col - 2, currentBoard) &&
+        isEmptyCell(row, col - 3, currentBoard) &&
+        currentBoard[row][0]?.type === "T" &&
+        currentBoard[row][0]?.color === piece.color
       ) {
         validMoves.push({ row, col: col - 2 });
       }
@@ -253,10 +291,10 @@ export const Ajedrez = () => {
       // enroque corto
       if (
         !castling[piece.color].rightRookMoved &&
-        isEmptyCell(row, col + 1) &&
-        isEmptyCell(row, col + 2) &&
-        board[row][7]?.type === "T" &&
-        board[row][7]?.color === piece.color
+        isEmptyCell(row, col + 1, currentBoard) &&
+        isEmptyCell(row, col + 2, currentBoard) &&
+        currentBoard[row][7]?.type === "T" &&
+        currentBoard[row][7]?.color === piece.color
       ) {
         validMoves.push({ row, col: col + 2 });
       }
@@ -265,7 +303,12 @@ export const Ajedrez = () => {
     return validMoves;
   };
   //funcion del caballo
-  const moveHorse = (piece: Piece, row: number, col: number): Move[] => {
+  const moveHorse = (
+    piece: Piece,
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ): Move[] => {
     const moves = [
       { row: row - 2, col: col - 1 },
       { row: row - 2, col: col + 1 },
@@ -280,130 +323,58 @@ export const Ajedrez = () => {
     return moves.filter((move) => {
       if (!isInsideBoard(move.row, move.col)) return false;
 
-      if (isFriendPiece(piece, move.row, move.col)) return false;
+      if (isFriendPiece(piece, move.row, move.col, currentBoard)) return false;
 
       return true;
     });
   };
 
   //funcion reina|dama
-  const moveQueen = (piece: Piece, row: number, col: number) => {
-    return [...moveTower(piece, row, col), ...moveBishop(piece, row, col)];
+  const moveQueen = (
+    piece: Piece,
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ) => {
+    return [
+      ...moveTower(piece, row, col, currentBoard),
+      ...moveBishop(piece, row, col, currentBoard),
+    ];
   };
   //funcion torre
-  const moveTower = (piece: Piece, row: number, col: number): Move[] => {
+
+  const moveTower = (
+    piece: Piece,
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ): Move[] => {
     const moves: Move[] = [];
 
-    let isUpBreak = false;
-    let isDownBreak = false;
-    let isLeftBreak = false;
-    let isRightBreak = false;
-    for (let i = row - 1; i >= 0; i--) {
-      const isEmpty = isEmptyCell(i, col);
-      const isEnemy = isEnemyPiece(piece, i, col);
-      const isFriends = isFriendPiece(piece, i, col);
+    const directions = [
+      { r: -1, c: 0 },
+      { r: 1, c: 0 },
+      { r: 0, c: -1 },
+      { r: 0, c: 1 },
+    ];
 
-      if (isEmpty) {
-        moves.push({ row: i, col });
-      }
-      if (isEnemy && !isUpBreak) {
-        moves.push({ row: i, col });
-        isUpBreak = true;
-      }
+    for (const d of directions) {
+      let i = 1;
+      while (true) {
+        const newRow = row + d.r * i;
+        const newCol = col + d.c * i;
 
-      const distance = Math.abs(i - row);
+        if (!isInsideBoard(newRow, newCol)) break;
 
-      if (isFriends && distance === 1) {
-        break;
-      }
-      if (isFriends) {
-        break;
-      }
-      if (isFriends && !isUpBreak && distance > 1) {
-        moves.push({ row: i + 1, col });
-        isUpBreak = true;
-        break;
-      }
-    }
-
-    for (let i = row + 1; i < 8; i++) {
-      const isEmpty = isEmptyCell(i, col);
-      const isEnemy = isEnemyPiece(piece, i, col);
-      const isFriends = isFriendPiece(piece, i, col);
-      const distance = Math.abs(i - row);
-      if (isEmpty) {
-        moves.push({ row: i, col });
-      }
-      if (isEnemy && !isDownBreak) {
-        moves.push({ row: i, col });
-        isDownBreak = true;
-      }
-
-      if (isFriends && distance === 1) {
-        break;
-      }
-      if (isFriends) {
-        break;
-      }
-      console.log({ piece, isFriends, isDownBreak, distance });
-      if (isFriends && !isDownBreak && distance > 1) {
-        moves.push({ row: i - 1, col });
-        isDownBreak = true;
-        break;
-      }
-    }
-    for (let i = col - 1; i >= 0; i--) {
-      const isEmpty = isEmptyCell(row, i);
-      const isEnemy = isEnemyPiece(piece, row, i);
-      const isFriends = isFriendPiece(piece, row, i);
-
-      if (isEmpty) {
-        moves.push({ row, col: i });
-      }
-
-      if (isEnemy && !isLeftBreak) {
-        moves.push({ row, col: i });
-        isLeftBreak = true;
-      }
-      const distance = Math.abs(i - col);
-      if (isFriends && distance === 1) {
-        break;
-      }
-      if (isFriends) {
-        break;
-      }
-
-      if (isFriends && !isLeftBreak && distance > 1) {
-        moves.push({ row, col: i });
-        isUpBreak = true;
-        break;
-      }
-    }
-
-    for (let i = col + 1; i < 8; i++) {
-      const isEmpty = isEmptyCell(row, i);
-      const isEnemy = isEnemyPiece(piece, row, i);
-      const isFriends = isFriendPiece(piece, row, i);
-
-      if (isEmpty) {
-        moves.push({ row, col: i });
-      }
-
-      if (isEnemy && !isRightBreak) {
-        moves.push({ row, col: i });
-        isDownBreak = true;
-      }
-      const distance = Math.abs(i - col);
-      if (isFriends && distance === 1) {
-        break;
-      }
-      if (isFriends) {
-        break;
-      }
-      if (isFriends && !isRightBreak && distance > 1) {
-        moves.push({ row, col: i - 1 });
-        isRightBreak = true;
-        break;
+        if (isEmptyCell(newRow, newCol, currentBoard)) {
+          moves.push({ row: newRow, col: newCol });
+        } else {
+          if (isEnemyPiece(piece, newRow, newCol, currentBoard)) {
+            moves.push({ row: newRow, col: newCol });
+          }
+          break;
+        }
+        i++;
       }
     }
 
@@ -411,65 +382,37 @@ export const Ajedrez = () => {
   };
 
   //funcion alfil
-  const moveBishop = (piece: Piece, row: number, col: number) => {
+  const moveBishop = (
+    piece: Piece,
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ) => {
     const moves: Move[] = [];
-    //arriba izq
-    for (let i = 1; i < 8; i++) {
-      const newRow = row - i;
-      const newCol = col - i;
-      if (!isInsideBoard(newRow, newCol)) break;
-      if (isEmptyCell(newRow, newCol)) {
-        moves.push({ row: newRow, col: newCol });
-        continue;
-      }
-      if (isEnemyPiece(piece, newRow, newCol)) {
-        moves.push({ row: newRow, col: newCol });
-        break;
-      }
-    }
-    //arriba derecha
-    let breakLeftDown = false;
-    for (let i = 1; i < 8; i++) {
-      const newRow = row - i;
-      const newCol = col + i;
-      if (!isInsideBoard(newRow, newCol)) break;
-      if (isEmptyCell(newRow, newCol)) {
-        moves.push({ row: newRow, col: newCol });
-        continue;
-      }
 
-      if (isEnemyPiece(piece, newRow, newCol)) {
-        moves.push({ row: newRow, col: newCol });
-        break;
-      }
-    }
-    //abajo izquierda
-    for (let i = 1; i < 8; i++) {
-      const newRow = row + i;
-      const newCol = col - i;
-      if (!isInsideBoard(newRow, newCol)) break;
-      if (isEmptyCell(newRow, newCol)) {
-        moves.push({ row: newRow, col: newCol });
-        continue;
-      }
-      const distance = newRow - row / newCol - col;
-      console.log({ distance, row, col, newRow, newCol });
-      if (isEnemyPiece(piece, newRow, newCol)) {
-        moves.push({ row: newRow, col: newCol });
-        break;
-      }
-    }
-    //abajo derecha
-    for (let i = 1; i < 8; i++) {
-      const newRow = row + i;
-      const newCol = col + i;
-      if (!isInsideBoard(newRow, newCol)) break;
-      if (isEmptyCell(newRow, newCol)) {
-        moves.push({ row: newRow, col: newCol });
-        continue;
-      }
-      if (isEnemyPiece(piece, newRow, newCol)) {
-        moves.push({ row: newRow, col: newCol });
+    const directions = [
+      { r: -1, c: -1 }, //izquierda arriba
+      { r: -1, c: 1 }, //arriba derecha
+      { r: 1, c: 1 }, //abajo derecha
+      { r: 1, c: -1 }, //abajo izquiera
+    ];
+
+    for (const d of directions) {
+      let i = 1;
+
+      while (true) {
+
+
+        const newRow = row + d.r * i;
+        const newCol = col + d.c * i;
+        if (!isInsideBoard(newRow, newCol)) break;
+        if (isEmptyCell(newRow, newCol, currentBoard)) {
+          moves.push({ row: newRow, col: newCol });
+          continue;
+        }
+        if (isEnemyPiece(piece, newRow, newCol, currentBoard)) {
+          moves.push({ row: newRow, col: newCol });
+        }
         break;
       }
     }
@@ -477,7 +420,12 @@ export const Ajedrez = () => {
     return moves;
   };
   //funcion peon
-  const movePawn = (piece: Piece, row: number, col: number): Move[] => {
+  const movePawn = (
+    piece: Piece,
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ): Move[] => {
     const moves: Move[] = [];
 
     const defaultRows = [1, 6];
@@ -490,8 +438,7 @@ export const Ajedrez = () => {
 
       if (!isInsideBoard(nextRow, col)) break;
 
-      // si hay una pieza al frente, ya no puede seguir avanzando
-      if (!isEmptyCell(nextRow, col)) break;
+      if (!isEmptyCell(nextRow, col, currentBoard)) break;
 
       moves.push({ row: nextRow, col });
     }
@@ -519,7 +466,7 @@ export const Ajedrez = () => {
     const attackMoves = getPawnAttackMoves(piece, row, col);
 
     attackMoves.forEach((move) => {
-      if (isEnemyPiece(piece, move.row, move.col)) {
+      if (isEnemyPiece(piece, move.row, move.col, currentBoard)) {
         moves.push(move);
       }
     });
@@ -528,24 +475,28 @@ export const Ajedrez = () => {
   };
 
   //obtener los movimientos
-  const getPossibleMoves = (row: number, col: number): Move[] => {
-    const piece = board[row][col];
+  const getPossibleMoves = (
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ): Move[] => {
+    const piece = currentBoard[row][col];
 
     if (!piece) return [];
     //casos
     switch (piece.type) {
       case "C":
-        return moveHorse(piece, row, col);
+        return moveHorse(piece, row, col, currentBoard);
       case "R":
-        return moveKing(piece, row, col);
+        return moveKing(piece, row, col, currentBoard);
       case "D":
-        return moveQueen(piece, row, col);
+        return moveQueen(piece, row, col, currentBoard);
       case "T":
-        return moveTower(piece, row, col);
+        return moveTower(piece, row, col, currentBoard);
       case "A":
-        return moveBishop(piece, row, col);
+        return moveBishop(piece, row, col, currentBoard);
       case "P":
-        return movePawn(piece, row, col);
+        return movePawn(piece, row, col, currentBoard);
       default:
         return [];
     }
@@ -644,10 +595,10 @@ export const Ajedrez = () => {
 
   //Rey en Jaque
   //encontar al rey
-  const findKing = (color: PieceColor) => {
+  const findKing = (color: PieceColor, currentBoard: Cell[][]) => {
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
-        const piece = board[row][col];
+        const piece = currentBoard[row][col];
 
         if (piece?.type === "R" && piece.color === color) {
           return { row, col };
@@ -670,103 +621,75 @@ export const Ajedrez = () => {
     ].filter((move) => isInsideBoard(move.row, move.col));
   };
   //ataque
-  const getAttackMoves = (row: number, col: number): Move[] => {
-    const piece = board[row][col];
+  const getAttackMoves = (
+    row: number,
+    col: number,
+    currentBoard: Cell[][] = board,
+  ): Move[] => {
+    const piece = currentBoard[row][col];
 
     if (!piece) return [];
 
     if (piece.type === "P") {
       return getPawnAttackMoves(piece, row, col);
     }
+    if (piece.type === "R") {
+      const kingMoves = [
+        { row: row - 1, col: col - 1 }, { row: row - 1, col }, { row: row - 1, col: col + 1 },
+        { row, col: col - 1 }, { row, col: col + 1 },
+        { row: row + 1, col: col - 1 }, { row: row + 1, col }, { row: row + 1, col: col + 1 },
+      ];
+      //  casilla este dentro del tablero de 8x8
+      return kingMoves.filter((move) => isInsideBoard(move.row, move.col));
+    }
 
-    return getPossibleMoves(row, col);
+    return getPossibleMoves(row, col, currentBoard);
   };
-
   // funcion que detecta el jaque
-  const isKingInCheck = (color: PieceColor) => {
-    const kingPosition = findKing(color);
+  const isKingInCheck = (color: PieceColor, currentBoard: Cell[][] = board) => {
+    // posición del rey 
+    const kingPosition = findKing(color, currentBoard);
 
     if (!kingPosition) return false;
 
+    //  color del enemigo
     const enemyColor = color === "white" ? "black" : "white";
-    for (let row = 0; row < 8; row++) {
-      for (let col = 0; col < 8; col++) {
-        const currentCell = board[row][col];
-        const piece =
-          Object.keys(currentCell || {}).length === 0 ? null : currentCell;
-        if (!piece || (piece && piece.color !== enemyColor)) continue;
 
-        {
-          const attackMoves = getAttackMoves(row, col);
-          const isThreateningKing = attackMoves.some(
-            (move) =>
-              move.row === kingPosition.row && move.col === kingPosition.col,
-          );
+    //  ataques del enemigo 
+    const enemyAttacks = getSquaresAttackedByColor(enemyColor, currentBoard);
 
-          console.log({ piece, row, col, attackMoves, isThreateningKing });
-          if (isThreateningKing) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
+    // jaque si esta dentro del radar enemigo
+    const kingIsThreatened = enemyAttacks.some(
+      (move) => move.row === kingPosition.row && move.col === kingPosition.col,
+    );
+
+    return kingIsThreatened;
   };
 
-  //   useEffect(() => {
-  //     if (isCheckmate("white")) {
-  //       setMessage("Jaque mate al rey Blanco. ¡Gana Negro!");
-  //       setIsRunning(false);
-  //       return;
-  //     }
-
-  //     if (isCheckmate("black")) {
-  //       setMessage("Jaque mate al rey Negro. ¡Gana Blanco!");
-  //       setIsRunning(false);
-  //       return;
-  //     }
-
-  //     if (isKingInCheck("white")) {
-  //       setMessage("Jaque al rey Blanco");
-  //     } else if (isKingInCheck("black")) {
-  //       setMessage("Jaque al rey Negro");
-  //     } else {
-  //       setMessage("");
-  //     }
-  //   }, [board]);
-
-  //que pieza esta dando jaque
-  const getCheckingPieces = (color: PieceColor): Move[] => {
-    const kingPosition = findKing(color);
-
-    if (!kingPosition) return [];
-
-    const enemyColor = color === "white" ? "black" : "white";
-    const threats: Move[] = [];
-
-    for (let row = 0; row < 8; row++) {
-      for (let col = 0; col < 8; col++) {
-        const piece = board[row][col];
-
-        if (!piece || piece.color !== enemyColor) continue;
-
-        const attackMoves = getAttackMoves(row, col);
-
-        const isThreateningKing = attackMoves.some(
-          (move) =>
-            move.row === kingPosition.row && move.col === kingPosition.col,
-        );
-
-        if (isThreateningKing) {
-          threats.push({ row, col });
-        }
-      }
+  useEffect(() => {
+    if (isCheckmate("white")) {
+      setMessage("Jaque mate al rey Blanco. ¡Gana Negro!");
+      setIsRunning(false);
+      return;
     }
 
-    return threats;
-  };
+    if (isCheckmate("black")) {
+      setMessage("Jaque mate al rey Negro. ¡Gana Blanco!");
+      setIsRunning(false);
+      return;
+    }
+
+    if (isKingInCheck("white")) {
+      setMessage("Jaque al rey Blanco");
+    } else if (isKingInCheck("black")) {
+      setMessage("Jaque al rey Negro");
+    } else {
+      setMessage("");
+    }
+  }, [board]);
+
   //jaque mate
-  // Simula un movimiento y evalúa si el rey sigue en jaque
+  // Simula un movimiento y evalu si el rey sigue en jaque
   const movementLeavesKingInCheck = (
     fromRow: number,
     fromCol: number,
@@ -774,32 +697,29 @@ export const Ajedrez = () => {
     toCol: number,
     color: PieceColor,
   ): boolean => {
-    const newBoard = board;
-    const originalSource = { ...newBoard[fromRow][fromCol] } as Cell;
-    const originalTarget = { ...newBoard[toRow][toCol] } as Cell;
 
-    newBoard[toRow][toCol] = originalSource;
-    newBoard[fromRow][fromCol] = null;
-    let checkingAfterMove = false;
-    if (toRow === 4 && toCol === 2) {
-      checkingAfterMove = isKingInCheck(color);
-      console.log({
-        checkingAfterMove,
-        fromRow,
-        fromCol,
-        toRow,
-        toCol,
-        newBoard,
-      });
+    // proximidad antes de simular la captura
+    const movingPiece = board[fromRow][fromCol];
+    if (movingPiece && movingPiece.type === "R") {
+      const enemyColor = color === "white" ? "black" : "white";
+      const enemyKingPos = findKing(enemyColor, board);
+      if (enemyKingPos) {
+        const rowDist = Math.abs(toRow - enemyKingPos.row);
+        const colDist = Math.abs(toCol - enemyKingPos.col);
+        if (rowDist <= 1 && colDist <= 1) {
+          return true; // el rey no puede acercarse al otro rey
+        }
+      }
     }
+    const simulatedBoard = board.map((row) => [...row]);
 
-    newBoard[fromRow][fromCol] = originalSource;
-    newBoard[toRow][toCol] =
-      Object.keys(originalTarget || {}).length === 0 ? null : originalTarget;
+    simulatedBoard[toRow][toCol] = simulatedBoard[fromRow][fromCol];
+    simulatedBoard[fromRow][fromCol] = null;
 
-    return checkingAfterMove;
+    return isKingInCheck(color, simulatedBoard);
   };
 
+  //si esta en jaque
   const isCheckmate = (color: PieceColor): boolean => {
     if (!isKingInCheck(color)) return false;
 
@@ -824,16 +744,37 @@ export const Ajedrez = () => {
 
     return true;
   };
+  //casilla atacada
+  const getSquaresAttackedByColor = (
+    color: PieceColor,
+    currentBoard: Cell[][] = board,
+  ): Move[] => {
+    const attackedSquares: Move[] = [];
 
-  // Cronometro
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = currentBoard[row][col];
+
+        // Si la pieza pertenece al color atacante, guardamos sus objetivos
+        if (piece && piece.color === color) {
+          const attacks = getAttackMoves(row, col, currentBoard);
+          attackedSquares.push(...attacks);
+        }
+      }
+    }
+
+    return attackedSquares;
+  };
+
+  // Temporizador
   useEffect(() => {
     if (!isRunning) return;
 
     const interval = setInterval(() => {
       if (turn === "white") {
-        setWhiteTime((prev) => prev + 10);
+        setWhiteTime((prev) => Math.max(prev - 10, 0));
       } else {
-        setBlackTime((prev) => prev + 10);
+        setBlackTime((prev) => Math.max(prev - 10, 0));
       }
     }, 10);
 
@@ -857,8 +798,8 @@ export const Ajedrez = () => {
     setTurn("white");
     setCapturedWhite([]);
     setCapturedBlack([]);
-    setWhiteTime(0);
-    setBlackTime(0);
+    setWhiteTime(playTime);
+    setBlackTime(playTime);
     setIsRunning(true);
     setCastling({
       white: {
@@ -886,8 +827,8 @@ export const Ajedrez = () => {
     setTurn("white");
     setCapturedWhite([]);
     setCapturedBlack([]);
-    setWhiteTime(0);
-    setBlackTime(0);
+    setWhiteTime(playTime);
+    setBlackTime(playTime);
     setIsRunning(false);
     setCastling({
       white: {
@@ -949,9 +890,49 @@ export const Ajedrez = () => {
     setIsRunning(parsedGame.isRunning);
     setCastling(parsedGame.castling);
   }, []);
+  const BoxNumber = () => {
+    const number =
+      "w-12 h-12.5 flex justify-center items-center border border-transparent  ";
+    return (
+      <>
+        <div className="flex flex-col text-2xl   ">
+          <span className={number}>1</span>
+
+          <span className={number}>2</span>
+          <span className={number}>3</span>
+          <span className={number}>4</span>
+          <span className={number}>5</span>
+          <span className={number}>6</span>
+          <span className={number}>7</span>
+          <span className={number}>8</span>
+        </div>
+      </>
+    );
+  };
+  const BoxLetter = () => {
+    const letter =
+      "justify-center text-center items-center h-12 w-12  pt-2 border border-transparent ";
+
+    return (
+      <>
+        {" "}
+        <div className="flex flex-row text-2xl ml-11.5">
+          <span className={letter}>a</span>
+          <span className={letter}>b</span>
+          <span className={letter}>c</span>
+          <span className={letter}>d</span>
+          <span className={letter}>e</span>
+          <span className={letter}>f</span>
+          <span className={letter}>g</span>
+          <span className={letter}>h</span>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="mt-50">
-      <div className="absolute left-80 top-85 w-60 rounded-2xl text-center flex">
+      <div className="absolute left-80 top-85 w-60  rounded-2xl text-center flex">
         <p>Piezas blancas capturadas: </p>
         <div className="grid grid-cols-4 text-4xl ">
           {capturedWhite.map((piece) => pieceRender(piece)) || "Ninguna"}
@@ -964,41 +945,87 @@ export const Ajedrez = () => {
       <div className="flex justify-center items-center w-full">
         Tiempo: {formatTime(blackTime)}
       </div>
+      <BoxLetter></BoxLetter>
+      <div className="flex flex-row">
+        <BoxNumber></BoxNumber>
+        <div>
+          <div>
+            <div>
+              {board.map((row, rowIndex) => {
+                const enemyColor = turn === "white" ? "black" : "white";
+                const enemyThreats = getSquaresAttackedByColor(
+                  enemyColor,
+                  board,
+                );
 
-      {board.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex border w-95">
-          {row.map((cell, colIndex) => {
-            const isWhite = (rowIndex + colIndex) % 2 === 0;
-            const isPossibleMove = pieceSelected?.suggestions.some(
-              (move) => move.row === rowIndex && move.col === colIndex,
-            );
+                return (
+                  <div key={rowIndex} className="flex border w-95">
+                    {row.map((cell, colIndex) => {
+                      const isWhite = (rowIndex + colIndex) % 2 === 0;
+                      const isPossibleMove = pieceSelected?.suggestions.some(
+                        (move) =>
+                          move.row === rowIndex && move.col === colIndex,
+                      );
 
-            return (
-              <button
-                key={`${rowIndex}-${colIndex}`}
-                className={`relative w-12 h-12 ${isWhite ? "bg-white text-black" : "bg-black text-white"
-                  }`}
-                onClick={() => handleSelectPiece(rowIndex, colIndex)}
-              >
-                {isPossibleMove && (
-                  <span className="absolute inset-0 bg-green-400/40"></span>
-                )}
+                      const isSquareUnderAttack = enemyThreats.some(
+                        (threat) =>
+                          threat.row === rowIndex && threat.col === colIndex,
+                      );
 
-                <span className="relative z-10 text-4xl">
-                  {pieceRender(cell)}
-                </span>
-              </button>
-            );
-          })}
+                      const isPieceThreatened =
+                        cell !== null &&
+                        cell.color === turn &&
+                        isSquareUnderAttack;
+
+                      return (
+                        <button
+                          key={`${rowIndex}-${colIndex}`}
+                          className={`relative w-12 h-12 ${isWhite
+                            ? "bg-white text-black"
+                            : "bg-black text-white"
+                            }`}
+                          onClick={() => handleSelectPiece(rowIndex, colIndex)}
+                        >
+                          {isPieceThreatened && (
+                            <span className="absolute inset-0 bg-red-500/40 z-0"></span>
+                          )}
+
+                          {isPossibleMove && (
+                            <span className="absolute inset-0 bg-green-400/40 z-0"></span>
+                          )}
+
+                          <span className="relative z-10 text-4xl">
+                            {pieceRender(cell)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      ))}
+        <BoxNumber></BoxNumber>
+      </div>
+
+      <BoxLetter></BoxLetter>
       <div className="flex justify-center items-center w-full">
         Tiempo: {formatTime(whiteTime)}
       </div>
-      <div className="  absolute   rounded-2xl right-40 w-70 flex">
-        <p className="text-center">Piezas negras capturadas: </p>
-        <div className="grid grid-cols-4 text-4xl">
-          {capturedBlack.map((cell: Cell) => pieceRender(cell)) || "Ninguna"}
+      <div className="absolute rounded-2xl right-40 w-70 flex flex-col gap-2 bg-neutral-100 p-3 shadow-sm">
+        <p className="font-semibold text-sm text-neutral-700">
+          Piezas negras capturadas:
+        </p>
+        <div className="flex flex-wrap gap-1 text-4xl text-black">
+          {capturedBlack.length > 0
+            ? capturedBlack.map((cell: Cell, index) => (
+              <span key={index} className="inline-block transition-transform hover:scale-110">
+                {pieceRender(cell)}
+              </span>
+            ))
+            : <span className="text-sm text-neutral-400 italic pt-2">Ninguna</span>
+          }
         </div>
       </div>
       <div className="flex justify-center mt-2">
