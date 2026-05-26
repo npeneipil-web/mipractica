@@ -119,6 +119,7 @@ const boardDefault: Cell[][] = [
     { type: "T", color: "white" },
   ],
 ];
+
 const LOCAL_STORAGE_KEY = "ajedrez";
 
 export const Ajedrez = () => {
@@ -152,7 +153,7 @@ export const Ajedrez = () => {
   });
 
   //mensaje en jaque
-  const [messaje, setMessage] = useState("");
+  const [message, setMessage] = useState("");
 
   const playTime = 20 * 60 * 1000;
   //tiempo por jugador
@@ -945,8 +946,9 @@ export const Ajedrez = () => {
   };
 
   return (
-    <div>
-      <Tabs>
+    <>
+      <div>
+        {" "}
         <div className="mt-50 w-300 flex flex-row justify-center gap-5 ">
           <div className=" rounded-2xl w-70 h-30 flex flex-col gap-2 bg-neutral-100 p-3 mt-2  shadow-sm">
             <p className="font-semibold text-sm text-neutral-700">
@@ -1028,7 +1030,6 @@ export const Ajedrez = () => {
                                   handleSelectPiece(rowIndex, colIndex)
                                 }
                               >
-                                º
                                 {isPieceThreatened && (
                                   <span className="absolute inset-0 bg-red-500/40 z-0"></span>
                                 )}
@@ -1077,9 +1078,9 @@ export const Ajedrez = () => {
               </button>
             </div>
             <div className="top-10 flex justify-center mt-4 bg-amber-100 border border-amber-100 rounded-2xl  ">
-              {messaje && (
+              {message && (
                 <p className="text-center font-bold flex text-[20px]">
-                  {messaje}
+                  {message}
                 </p>
               )}
             </div>
@@ -1108,6 +1109,24 @@ export const Ajedrez = () => {
             </div>
           </div>
         </div>
+      </div>
+    </>
+  );
+};
+export const AjedrezDiv = () => {
+  return (
+    <div className="w-full">
+      <Tabs defaultValue="ajedrez">
+        <TabsList>
+          <TabsTrigger value="ajedrez">Ajedrez</TabsTrigger>
+          <TabsTrigger value="cat">Gato</TabsTrigger>
+        </TabsList>
+        <TabsContent value="ajedrez">
+          <Ajedrez />
+        </TabsContent>
+        <TabsContent value="cat">
+          <Cat />
+        </TabsContent>
       </Tabs>
     </div>
   );

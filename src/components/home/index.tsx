@@ -7,9 +7,6 @@ import {
 import { Link } from "react-router-dom";
 
 export const Home = () => {
-  const design =
-    "text-white w-90  flex hover:text-black font-bold py-2 px-4 bg-gray-400 hover:bg-gray-100 transform transition hover:translate-1 motion-reduce:hover:transform-none";
-
   return (
     <>
       <Sheet>
@@ -17,44 +14,44 @@ export const Home = () => {
           <Button variant="outline">Menu</Button>
         </SheetTrigger>
         <SheetContent>
-          <div className="min-h-screen bg-slate-0 p-4 flex justify-center  font-sans shado">
-            <div className="flex flex-col">
-              <Link to="/" className={design}>
-                Home
-              </Link>
-              <Link to="/employee" className={design}>
-                Empleados
-              </Link>
-              <Link to="/404" className={design}>
-                Error 404
-              </Link>
-              <Link to="/input-form" className={design}>
-                Formulario
-              </Link>
-              <Link to="/pokeApi" className={design}>
-                PokeApi
-              </Link>
-              <Link to="/calculadora" className={design}>
-                Calculadora
-              </Link>
-              <Link to="/lorempicsum" className={design}>
-                Lorem
-              </Link>
-              <Link to="/practica" className={design}>
-                Practica
-              </Link>
-              <Link to="/articulos" className={design}>
-                Supermercado
-              </Link>
-              <Link to="/calculator" className={design}>
-                Calculadora 2
-              </Link>
-              <Link to="/cat" className={design}>
-                Gato
-              </Link>
-              <Link to="/ajedrez" className={design}>
-                Ajedrez
-              </Link>
+          <div className="min-h-screen w-full  bg-slate-0 p-5 flex justify-center  font-sans shado]">
+            <div className="flex flex-col w-full">
+              <Button variant="outline" className="w-full">
+                <Link to="/">Home</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/employee">Empleados</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/404">Error 404</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/input-form">Formulario</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/pokeApi">PokeApi</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/calculadora">Calculadora</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/lorempicsum">Lorem</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/practica">Practica</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/articulos">Supermercado</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/calculator">Calculadora 2</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/cat">Gato</Link>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Link to="/ajedrez">Ajedrez</Link>
+              </Button>
             </div>
           </div>
         </SheetContent>

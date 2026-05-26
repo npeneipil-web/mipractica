@@ -92,7 +92,41 @@ export const Cat = () => {
     flat: board.flatMap((x) => x),
     flat2: board.map((x) => x).flat(),
   });
+  const CatDiv = () => {
+    return (
+      <>
+        {" "}
+        <div className="flex flex-col items-center gap-4 p-6">
+          <h1 className="text-2xl font-bold">Juego del gato</h1>
 
+          <p>{winner ? `Ganó: ${winner}` : `Turno de: ${turn}`}</p>
+
+          <div className="grid grid-cols-3">
+            {board.map((row, rowIndex) =>
+              row.map((col, colIndex) => (
+                <button
+                  key={`${rowIndex}-${colIndex}`}
+                  onClick={() => play(rowIndex, colIndex)}
+                  className={button}
+                >
+                  {col}
+                </button>
+              )),
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setBoard(defaultBoard);
+              setTurn("X");
+              setWinner(null);
+            }}
+          >
+            Resetear
+          </button>
+        </div>
+      </>
+    );
+  };
   return (
     <>
       <Tabs>
@@ -101,34 +135,7 @@ export const Cat = () => {
           <TabsTrigger value="ajedrez">Ajedrez</TabsTrigger>
         </TabsList>
         <TabsContent value="cat">
-          <div className="flex flex-col items-center gap-4 p-6">
-            <h1 className="text-2xl font-bold">Juego del gato</h1>
-
-            <p>{winner ? `Ganó: ${winner}` : `Turno de: ${turn}`}</p>
-
-            <div className="grid grid-cols-3">
-              {board.map((row, rowIndex) =>
-                row.map((col, colIndex) => (
-                  <button
-                    key={`${rowIndex}-${colIndex}`}
-                    onClick={() => play(rowIndex, colIndex)}
-                    className={button}
-                  >
-                    {col}
-                  </button>
-                )),
-              )}
-            </div>
-            <button
-              onClick={() => {
-                setBoard(defaultBoard);
-                setTurn("X");
-                setWinner(null);
-              }}
-            >
-              Resetear
-            </button>
-          </div>
+          <CatDiv></CatDiv>
         </TabsContent>
         <TabsContent value="ajedrez">
           <Ajedrez></Ajedrez>

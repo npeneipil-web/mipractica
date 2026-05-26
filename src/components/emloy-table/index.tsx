@@ -1,4 +1,16 @@
 //Definimos una interfaz Employee que describe la estructura de los datos que se van a mostrar en la tabla.
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Tabs,
+  TabsContent,
+  TabsTrigger,
+} from "@outlier-spa/component";
+
 //  Esta interfaz incluye campos como name, position, description, email y age.
 interface Employee {
   name: string;
@@ -32,40 +44,53 @@ export const EmployeeTable: React.FC<Employee> = ({
   console.log({ name, position, description, email, age });
   //si no hay datos para mostrar, es decir, si todos los campos son vacios, se muestra un mensaje indicando que no hay datos para mostrar.
   if (!email && !name && !position && !description && !age) {
-    return <p>No hay datos para mostrar</p>;
+    return (
+      <div className="flex mt-10">
+        <p>No hay datos para mostrar</p>
+      </div>
+    );
   }
-
+  const desing = "font-bold text-[15px]";
   return (
     //se muestra una tabla con los datos del empleado, cada fila de la tabla corresponde a un campo diferente (nombre, cargo, email, descripcion y edad).
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full max-w-md mb-10">
-      <table>
-        <tbody>
-          <tr>
-            <td className="font-bold text-[18px]">Nombre</td>
-            <td>{name}</td>
-          </tr>
-          <tr>
-            <td className="font-bold text-[18px]">Cargo</td>
-            <td>{position}</td>
-          </tr>
-          <tr>
-            <td className="font-bold text-[18px]">
-              <p>Email</p>
-              {Math.PI > 4 && <p style={{ color: "#FF0000" }}>Mensaje</p>}
-              <p style={{ color: "#FF0000", display: "none" }}>Mensaje</p>
-            </td>
-            <td>{email}</td>
-          </tr>
-          <tr>
-            <td className="font-bold text-[18px]">Descripcion</td>
-            <td>{description}</td>
-          </tr>
-          <tr>
-            <td className="font-bold text-[18px]">Edad</td>
-            <td>{age}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+
+    <Card className="w-100 flex mt-10 py-6 gap-6">
+      <CardHeader className="text-2xl justify-center">
+        <CardTitle>Información</CardTitle>
+        <CardDescription>Datos ingresados</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div>
+          <Tabs defaultValue="overview">
+            <Card>
+              <CardHeader>
+                <CardTitle className={desing}>Nombre</CardTitle>
+                <CardDescription>{name}</CardDescription>
+              </CardHeader>
+              <CardHeader>
+                <CardTitle className={desing}>Cargo</CardTitle>
+                <CardDescription>{position}</CardDescription>
+              </CardHeader>
+              <CardHeader>
+                <CardTitle className={desing}>
+                  <p>Email</p>
+                  {Math.PI > 4 && <p style={{ color: "#FF0000" }}>Mensaje</p>}
+                  <p style={{ color: "#FF0000", display: "none" }}>Mensaje</p>
+                </CardTitle>
+                <CardDescription>{email}</CardDescription>
+              </CardHeader>
+              <CardHeader>
+                <CardTitle className={desing}>Descripcion</CardTitle>
+                <CardDescription>{description}</CardDescription>
+              </CardHeader>
+              <CardHeader>
+                <CardTitle className={desing}>Edad</CardTitle>
+                <CardDescription>{age}</CardDescription>
+              </CardHeader>
+            </Card>
+          </Tabs>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

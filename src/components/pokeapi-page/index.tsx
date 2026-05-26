@@ -1,3 +1,4 @@
+import { BorderBeam, Card } from "@outlier-spa/component";
 import { useEffect, useState } from "react";
 
 interface PokemonData {
@@ -117,21 +118,21 @@ export const PokeApiPage = () => {
 
   return (
     <>
-      <div className="p-10 flex flex-col items-center">
-        <PokemonTable {...(pokemonData ?? nonePokemon)} />
+      <div className=" ">
+        <PokemonTable {...(pokemonData ?? nonePokemon)}></PokemonTable>
         {/**revisa si se busco algo y si no encontró datos */}
-        <div className="flex gap-2 mb-8 absolute top-40 left-160  ">
-          <input
-            className="border p-2 rounded shadow-sm items-center justify-center"
-            type="text"
-            placeholder="Ej: ditto, pikachu..."
-            value={tempSearch}
-            onChange={(e) => setTempSearch(e.target.value)}
-          />
-        </div>
+
+        <input
+          className="border p-2  rounded shadow-sm  "
+          type="text"
+          placeholder="Ej: ditto, pikachu..."
+          value={tempSearch}
+          onChange={(e) => setTempSearch(e.target.value)}
+        />
+
         <button
           className="bg-red-700 w-7 h-7 text-white text-center
-         rounded-full relative bottom-39 left-38 shadow-md transition delay-150 duration-300 ease-in-out hover:-translate-0 hover:scale-110 hover:bg-red-600"
+         rounded-full  bottom-39 left-38 shadow-md transition delay-150 duration-300 ease-in-out hover:-translate-0 hover:scale-110 hover:bg-red-600"
           onClick={() => {
             setTempSearch("");
           }}
@@ -188,46 +189,48 @@ export const PokemonTable: React.FC<PokemonData> = ({
 }) => {
   return (
     <>
-      <div className="font-serif bg-red-500 p-6 rounded-xl shadow-sm border border-slate-200 w-full max-w-md mb-10">
-        <div>
-          <div className="w-10 h-10 bg-blue-400 rounded-full"></div>
-          <div className="bg-white w-88 border border-slate-800 mt-3 m-6 h-70 ">
-            {src.length > 0 && (
-              <img
-                src={src}
-                alt={name}
-                className="w-60 h-60 mx-auto mb-auto relative
+      <div className="w-full flex  justify-center">
+        <Card className="font-serif bg-red-500 p-4">
+          <div className="flex flex-col justify-center">
+            <div className="w-10 h-10 bg-blue-400  rounded-full"></div>
+            <div className="bg-white w-88 border border-slate-800 mt-3 m-6 h-70 ">
+              {src.length > 0 && (
+                <img
+                  src={src}
+                  alt={name}
+                  className="w-60 h-60 mx-auto mb-auto relative
                  top-9 left-0"
-              />
-            )}
-          </div>
-          <div className="bg-gray-600 w-100 rounded-2xl pb-5 pt-2 ">
-            <div className="bg-lime-300 px-4 mx-1.5  border border-black rounded-full my-4 flex justify-between ">
-              <span className="font-bold text-[18px]">Pokemon</span>
-              <span className=" text-[18px] ">{name}</span>
-              <span className="text-[18px]">{name}</span>
+                />
+              )}
             </div>
+            <div className="bg-gray-600 w-100 rounded-2xl pb-5 pt-2 ">
+              <div className="bg-lime-300 px-4 mx-1.5  border border-black rounded-full my-4 flex justify-between ">
+                <span className="font-bold text-[18px]">Pokemon</span>
+                <span className=" text-[18px] ">{name}</span>
+                <span className="text-[18px]">{name}</span>
+              </div>
 
-            <table className=" mx-auto text-center border  border-black  ">
-              <tbody>
-                <tr className="bg-lime-300 ">
-                  <td className="font-bold text-[15px]  w-30">Altura</td>
-                  <td>{height || "-"}</td>
-                </tr>
-                <tr className="bg-lime-300 ">
-                  <td className="font-bold text-[15px] w-30">Peso</td>
-                  <td>{weight || "-"}</td>
-                </tr>
-                <tr className="bg-lime-300 ">
-                  <td className="font-bold text-[15px] w-30 ">Habilidades</td>
-                  <td className="w-35">
-                    {skills.length ? skills.join(", ") : "-"}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+              <table className=" mx-auto text-center border  border-black  ">
+                <tbody>
+                  <tr className="bg-lime-300 ">
+                    <td className="font-bold text-[15px]  w-30">Altura</td>
+                    <td>{height || "-"}</td>
+                  </tr>
+                  <tr className="bg-lime-300 ">
+                    <td className="font-bold text-[15px] w-30">Peso</td>
+                    <td>{weight || "-"}</td>
+                  </tr>
+                  <tr className="bg-lime-300 ">
+                    <td className="font-bold text-[15px] w-30 ">Habilidades</td>
+                    <td className="w-35">
+                      {skills.length ? skills.join(", ") : "-"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </Card>
       </div>
     </>
   );

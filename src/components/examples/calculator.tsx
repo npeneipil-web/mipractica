@@ -4,6 +4,13 @@
 // borrar #7b8182
 // fondo #252e32
 
+import {
+  BorderBeam,
+  Card,
+  CardContent,
+  CardHeader,
+  Tabs,
+} from "@outlier-spa/component";
 import { Delete } from "lucide-react";
 import { useState } from "react";
 
@@ -11,6 +18,7 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   isOperator?: boolean;
 }
 // al apretar = ejecuart eval("cadena de texto con la operacion matematica")
+
 const ButtonCustom: React.FC<ButtonProps> = ({
   children,
   isOperator = false,
@@ -52,52 +60,58 @@ export const Calculator = () => {
 
   return (
     <>
-      <div className=" w-full h-100 ">
-        <div className=" h-300">
-          <div className="w-120 h-140 absolute rounded-md bg-[#252e32] right-80 top-50 ">
-            <input
-              className="bg-[#252e32] w-110 h-20  relative  top-10 text-white text-right text-[50px]"
-              type="text"
-              value={display}
-            />
-            <div className="w-100 h-100 text p-2.5 relative left-10 top-10  grid grid-flow-col grid-rows-5  grid-cols-4 gap-4 bg-[#252e32]">
-              <ButtonCustom>
-                <Delete />
-              </ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("7")}>7</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("4")}>4</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("1")}>1</ButtonCustom>
-              <ButtonCustom hidden></ButtonCustom>
-              <ButtonCustom onClick={clearDisplay}>AC</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("8")}>8</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("5")}>5</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("2")}>2</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("0")}>0</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("%")}>%</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("9")}>9</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("6")}>6</ButtonCustom>
-              <ButtonCustom onClick={() => appendValue("3")}>3</ButtonCustom>
-              <ButtonCustom hidden></ButtonCustom>
-              <ButtonCustom isOperator onClick={() => appendValue("/")}>
-                /
-              </ButtonCustom>
-              <ButtonCustom isOperator onClick={() => appendValue("*")}>
-                X
-              </ButtonCustom>
-              <ButtonCustom isOperator onClick={() => appendValue("-")}>
-                -
-              </ButtonCustom>
-              <ButtonCustom isOperator onClick={() => appendValue("+")}>
-                +
-              </ButtonCustom>
-              <ButtonCustom
-                isOperator
-                onClick={() => setDisplay((prev) => eval(prev))}
-              >
-                =
-              </ButtonCustom>
-            </div>
-          </div>
+      <div className=" w-full h-full ">
+        <div className="flex justify-center mt-50  ">
+          <Card className="w-120 h-140 rounded-md bg-[#252e32]   ">
+            <CardHeader>
+              <div className="flex ">
+                <input
+                  className="bg-[#252e32] w-full   text-white text-right text-[50px]"
+                  type="text"
+                  value={display}
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <div className="w-100 h-100 text  grid grid-flow-col grid-rows-5  grid-cols-4 gap-4 bg-[#252e32]">
+                <ButtonCustom>
+                  <Delete />
+                </ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("7")}>7</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("4")}>4</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("1")}>1</ButtonCustom>
+                <ButtonCustom hidden></ButtonCustom>
+                <ButtonCustom onClick={clearDisplay}>AC</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("8")}>8</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("5")}>5</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("2")}>2</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("0")}>0</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("%")}>%</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("9")}>9</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("6")}>6</ButtonCustom>
+                <ButtonCustom onClick={() => appendValue("3")}>3</ButtonCustom>
+                <ButtonCustom hidden></ButtonCustom>
+                <ButtonCustom isOperator onClick={() => appendValue("/")}>
+                  /
+                </ButtonCustom>
+                <ButtonCustom isOperator onClick={() => appendValue("*")}>
+                  X
+                </ButtonCustom>
+                <ButtonCustom isOperator onClick={() => appendValue("-")}>
+                  -
+                </ButtonCustom>
+                <ButtonCustom isOperator onClick={() => appendValue("+")}>
+                  +
+                </ButtonCustom>
+                <ButtonCustom
+                  isOperator
+                  onClick={() => setDisplay((prev) => eval(prev))}
+                >
+                  =
+                </ButtonCustom>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </>

@@ -1,8 +1,34 @@
+import {
+  Card,
+  Button,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@outlier-spa/component";
 import { useState } from "react";
+import { Calculator } from "../examples/calculator";
 
 export const CalculadoraTable = () => {
   //retorna InputCalPage, componente que se encarga de mostrar el contenido de la calculadora.
-  return <InputCalPage></InputCalPage>;
+  return (
+    <>
+      <div>
+        <Tabs>
+          <TabsList>
+            <TabsTrigger value="cal1">Calculadora</TabsTrigger>
+            <TabsTrigger value="cal2">Calculadora 2</TabsTrigger>
+          </TabsList>
+          <TabsContent value="cal1">
+            <InputCalPage></InputCalPage>
+          </TabsContent>
+          <TabsContent value="cal2">
+            <Calculator></Calculator>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
+  );
 };
 
 //interface InputCalPageP es una interfaz que define las propiedades con las que puede
@@ -38,62 +64,62 @@ export const InputCalPage: React.FC<InputCalPageP> = ({ defaultNum }) => {
   };
 
   return (
-    <div>
-      <table>
+    <div className="flex justify-center mt-20 ">
+      <Card>
         <tbody>
-          <tr className=" bg-yellow-50">
-            <input
-              type="number"
-              placeholder="Ingrese numero"
-              value={num}
-              //Cuando el usuario cambia el valor del input, esta función toma ese nuevo valor,
-              //  lo convierte a número y actualiza el estado num
-              onChange={(e) => setNum(Number(e.target.value))}
-            />
-          </tr>
-
-          <tr className="w-100px h-100px bg-white">
-            <td>
-              <p>Suma</p>
-            </td>
-            <td>
-              <button className="w- bg-red-200" onClick={sumar}>
-                Sumar+1
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>Resta</p>
-            </td>
-            <td>
-              <button className="bg-green-200" onClick={restar}>
-                Restar-1
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>Multiplique</p>
-            </td>
-            <td>
-              <button className="bg-blue-200" onClick={multiplicar}>
-                Multiplique x2
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p>Divida</p>
-            </td>
-            <td>
-              <button className="bg-yellow-400" onClick={dividir}>
-                Dividir en 3
-              </button>
-            </td>
-          </tr>
+          <div className="flex justify-center w-90">
+            <tr className="h-10 ">
+              <input
+                className=" text-right border text-[20px]"
+                type="number"
+                placeholder="Ingrese numero"
+                value={num}
+                //Cuando el usuario cambia el valor del input, esta función toma ese nuevo valor,
+                //  lo convierte a número y actualiza el estado num
+                onChange={(e) => setNum(Number(e.target.value))}
+              />
+            </tr>
+          </div>
+          <div className="flex flex-col items-center gap-2 mt-4">
+            <tr className="bg-white">
+              <td>
+                <Button
+                  variant="outline"
+                  className=" bg-red-200 w-30"
+                  onClick={sumar}
+                >
+                  Sumar+1
+                </Button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Button
+                  className="bg-green-700 w-30"
+                  variant="default"
+                  onClick={restar}
+                >
+                  Restar-1
+                </Button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Button className="bg-blue-200 w-30" onClick={multiplicar}>
+                  Multiplique x2
+                </Button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Button className="bg-yellow-400 w-30" onClick={dividir}>
+                  Dividir en 3
+                </Button>
+              </td>
+            </tr>
+          </div>
         </tbody>
-      </table>
+      </Card>
     </div>
   );
 };
