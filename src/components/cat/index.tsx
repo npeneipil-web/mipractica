@@ -1,4 +1,11 @@
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@outlier-spa/component";
 import { useState } from "react";
+import { Ajedrez } from "../ajedrez";
 //type se usa para definir estructura de un objeto pero mas flexible
 type Player = "X" | "O";
 type Cell = Player | null;
@@ -88,34 +95,45 @@ export const Cat = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center gap-4 p-6">
-        <h1 className="text-2xl font-bold">Juego del gato</h1>
+      <Tabs>
+        <TabsList>
+          <TabsTrigger value="cat">Gato</TabsTrigger>
+          <TabsTrigger value="ajedrez">Ajedrez</TabsTrigger>
+        </TabsList>
+        <TabsContent value="cat">
+          <div className="flex flex-col items-center gap-4 p-6">
+            <h1 className="text-2xl font-bold">Juego del gato</h1>
 
-        <p>{winner ? `Ganó: ${winner}` : `Turno de: ${turn}`}</p>
+            <p>{winner ? `Ganó: ${winner}` : `Turno de: ${turn}`}</p>
 
-        <div className="grid grid-cols-3">
-          {board.map((row, rowIndex) =>
-            row.map((col, colIndex) => (
-              <button
-                key={`${rowIndex}-${colIndex}`}
-                onClick={() => play(rowIndex, colIndex)}
-                className={button}
-              >
-                {col}
-              </button>
-            )),
-          )}
-        </div>
-        <button
-          onClick={() => {
-            setBoard(defaultBoard);
-            setTurn("X");
-            setWinner(null);
-          }}
-        >
-          Resetear
-        </button>
-      </div>
+            <div className="grid grid-cols-3">
+              {board.map((row, rowIndex) =>
+                row.map((col, colIndex) => (
+                  <button
+                    key={`${rowIndex}-${colIndex}`}
+                    onClick={() => play(rowIndex, colIndex)}
+                    className={button}
+                  >
+                    {col}
+                  </button>
+                )),
+              )}
+            </div>
+            <button
+              onClick={() => {
+                setBoard(defaultBoard);
+                setTurn("X");
+                setWinner(null);
+              }}
+            >
+              Resetear
+            </button>
+          </div>
+        </TabsContent>
+        <TabsContent value="ajedrez">
+          <Ajedrez></Ajedrez>
+        </TabsContent>
+      </Tabs>
     </>
   );
 };

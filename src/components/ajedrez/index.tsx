@@ -1,6 +1,14 @@
 import { Braces, Rose, Rows } from "lucide-react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { Cat } from "../cat";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@outlier-spa/component";
+
 //crear los tipos de pieza y su color
 type PieceType = "R" | "D" | "T" | "C" | "A" | "P";
 type PieceColor = "white" | "black";
@@ -938,150 +946,15 @@ export const Ajedrez = () => {
 
   return (
     <div>
-      <div className="mt-50 w-300 flex flex-row justify-center gap-5 ">
-        <div className=" rounded-2xl w-70 h-30 flex flex-col gap-2 bg-neutral-100 p-3 mt-2  shadow-sm">
-          <p className="font-semibold text-sm text-neutral-700">
-            Piezas blancas capturadas:
-          </p>
-          <div className="flex flex-wrap gap-1 text-4xl text-black">
-            {capturedWhite.length > 0 ? (
-              capturedWhite.map((cell: Cell, index) => (
-                <span
-                  key={index}
-                  className="inline-block transition-transform hover:scale-110"
-                >
-                  {pieceRender(cell)}
-                </span>
-              ))
-            ) : (
-              <span className="text-sm text-neutral-400 italic pt-2">
-                Ninguna
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="w-120 ">
-          <div className="p-4">
-            <p className="font-bold font-mono text-[30px] text-center">
-              Ajedrez
-            </p>
-            <p className="mt-2 text-center">Turno de "{turn}"</p>
-          </div>
-          <div className="flex justify-center items-center  ">
-            <div className="flex justify-center w-40 text-white bg-gray-500 border border-gray-400 rounded-2xl shadow-sm ">
-              Tiempo: {formatTime(blackTime)}
-            </div>
-          </div>
-          <BoxLetter></BoxLetter>
-          <div className="flex flex-row">
-            <BoxNumber></BoxNumber>
-            <div>
-              <div>
-                <div>
-                  {board.map((row, rowIndex) => {
-                    const enemyColor = turn === "white" ? "black" : "white";
-                    const enemyThreats = getSquaresAttackedByColor(
-                      enemyColor,
-                      board,
-                    );
-
-                    return (
-                      <div key={rowIndex} className="flex border w-95">
-                        {row.map((cell, colIndex) => {
-                          const isWhite = (rowIndex + colIndex) % 2 === 0;
-                          const isPossibleMove =
-                            pieceSelected?.suggestions.some(
-                              (move) =>
-                                move.row === rowIndex && move.col === colIndex,
-                            );
-
-                          const isSquareUnderAttack = enemyThreats.some(
-                            (threat) =>
-                              threat.row === rowIndex &&
-                              threat.col === colIndex,
-                          );
-
-                          const isPieceThreatened =
-                            cell !== null &&
-                            cell.color === turn &&
-                            isSquareUnderAttack;
-
-                          return (
-                            <button
-                              key={`${rowIndex}-${colIndex}`}
-                              className={`relative w-12 h-12 ${
-                                isWhite
-                                  ? "bg-white text-black"
-                                  : "bg-black text-white"
-                              }`}
-                              onClick={() =>
-                                handleSelectPiece(rowIndex, colIndex)
-                              }
-                            >
-                              º
-                              {isPieceThreatened && (
-                                <span className="absolute inset-0 bg-red-500/40 z-0"></span>
-                              )}
-                              {isPossibleMove && (
-                                <span className="absolute inset-0 bg-green-400/40 z-0"></span>
-                              )}
-                              <span className="relative z-10 text-4xl">
-                                {pieceRender(cell)}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-            <BoxNumber></BoxNumber>
-          </div>
-
-          <BoxLetter></BoxLetter>
-          <div className="flex justify-center items-center ">
-            <div className="flex justify-center items-center w-40 bg-gray-500 border border-gray-400 rounded-2xl text-white shadow-sm ">
-              Tiempo: {formatTime(whiteTime)}
-            </div>
-          </div>
-          <div className="flex justify-center mt-5">
-            <button
-              className="w-25 h-10 left-35 bg-green-600 text-white border border-green-500 hover:bg-green-500 rounded-md"
-              onClick={startBoard}
-            >
-              Start
-            </button>
-            <button
-              className="w-25 h-10 left-35 bg-amber-500 border text-white border-amber-400 hover:bg-amber-400 rounded-md"
-              onClick={resetBoard}
-            >
-              Reset
-            </button>
-            <button
-              className="w-25 h-10 left-35 bg-red-600 text-white border border-red-500 hover:bg-red-500 rounded-md"
-              onClick={finish}
-            >
-              Terminar
-            </button>
-          </div>
-          <div className="top-10 flex justify-center mt-4 bg-amber-100 border border-amber-100 rounded-2xl  ">
-            {messaje && (
-              <p className="text-center font-bold flex text-[20px]">
-                {messaje}
-              </p>
-            )}
-          </div>
-        </div>
-        <div>
-          <div className=" rounded-2xl w-70 h-30 flex flex-col gap-2 bg-neutral-100 p-3 shadow-sm mt-2 mr-2 ">
+      <Tabs>
+        <div className="mt-50 w-300 flex flex-row justify-center gap-5 ">
+          <div className=" rounded-2xl w-70 h-30 flex flex-col gap-2 bg-neutral-100 p-3 mt-2  shadow-sm">
             <p className="font-semibold text-sm text-neutral-700">
-              Piezas negras capturadas:
+              Piezas blancas capturadas:
             </p>
             <div className="flex flex-wrap gap-1 text-4xl text-black">
-              {capturedBlack.length > 0 ? (
-                capturedBlack.map((cell: Cell, index) => (
+              {capturedWhite.length > 0 ? (
+                capturedWhite.map((cell: Cell, index) => (
                   <span
                     key={index}
                     className="inline-block transition-transform hover:scale-110"
@@ -1096,8 +969,146 @@ export const Ajedrez = () => {
               )}
             </div>
           </div>
+          <div className="w-120 ">
+            <div className="p-4">
+              <p className="font-bold font-mono text-[30px] text-center">
+                Ajedrez
+              </p>
+              <p className="mt-2 text-center">Turno de "{turn}"</p>
+            </div>
+            <div className="flex justify-center items-center  ">
+              <div className="flex justify-center w-40 text-white bg-gray-500 border border-gray-400 rounded-2xl shadow-sm ">
+                Tiempo: {formatTime(blackTime)}
+              </div>
+            </div>
+            <BoxLetter></BoxLetter>
+            <div className="flex flex-row">
+              <BoxNumber></BoxNumber>
+              <div>
+                <div>
+                  <div>
+                    {board.map((row, rowIndex) => {
+                      const enemyColor = turn === "white" ? "black" : "white";
+                      const enemyThreats = getSquaresAttackedByColor(
+                        enemyColor,
+                        board,
+                      );
+
+                      return (
+                        <div key={rowIndex} className="flex border w-95">
+                          {row.map((cell, colIndex) => {
+                            const isWhite = (rowIndex + colIndex) % 2 === 0;
+                            const isPossibleMove =
+                              pieceSelected?.suggestions.some(
+                                (move) =>
+                                  move.row === rowIndex &&
+                                  move.col === colIndex,
+                              );
+
+                            const isSquareUnderAttack = enemyThreats.some(
+                              (threat) =>
+                                threat.row === rowIndex &&
+                                threat.col === colIndex,
+                            );
+
+                            const isPieceThreatened =
+                              cell !== null &&
+                              cell.color === turn &&
+                              isSquareUnderAttack;
+
+                            return (
+                              <button
+                                key={`${rowIndex}-${colIndex}`}
+                                className={`relative w-12 h-12 ${
+                                  isWhite
+                                    ? "bg-white text-black"
+                                    : "bg-black text-white"
+                                }`}
+                                onClick={() =>
+                                  handleSelectPiece(rowIndex, colIndex)
+                                }
+                              >
+                                º
+                                {isPieceThreatened && (
+                                  <span className="absolute inset-0 bg-red-500/40 z-0"></span>
+                                )}
+                                {isPossibleMove && (
+                                  <span className="absolute inset-0 bg-green-400/40 z-0"></span>
+                                )}
+                                <span className="relative z-10 text-4xl">
+                                  {pieceRender(cell)}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              <BoxNumber></BoxNumber>
+            </div>
+
+            <BoxLetter></BoxLetter>
+            <div className="flex justify-center items-center ">
+              <div className="flex justify-center items-center w-40 bg-gray-500 border border-gray-400 rounded-2xl text-white shadow-sm ">
+                Tiempo: {formatTime(whiteTime)}
+              </div>
+            </div>
+            <div className="flex justify-center mt-5">
+              <button
+                className="w-25 h-10 left-35 bg-green-600 text-white border border-green-500 hover:bg-green-500 rounded-md"
+                onClick={startBoard}
+              >
+                Start
+              </button>
+              <button
+                className="w-25 h-10 left-35 bg-amber-500 border text-white border-amber-400 hover:bg-amber-400 rounded-md"
+                onClick={resetBoard}
+              >
+                Reset
+              </button>
+              <button
+                className="w-25 h-10 left-35 bg-red-600 text-white border border-red-500 hover:bg-red-500 rounded-md"
+                onClick={finish}
+              >
+                Terminar
+              </button>
+            </div>
+            <div className="top-10 flex justify-center mt-4 bg-amber-100 border border-amber-100 rounded-2xl  ">
+              {messaje && (
+                <p className="text-center font-bold flex text-[20px]">
+                  {messaje}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <div className=" rounded-2xl w-70 h-30 flex flex-col gap-2 bg-neutral-100 p-3 shadow-sm mt-2 mr-2 ">
+              <p className="font-semibold text-sm text-neutral-700">
+                Piezas negras capturadas:
+              </p>
+              <div className="flex flex-wrap gap-1 text-4xl text-black">
+                {capturedBlack.length > 0 ? (
+                  capturedBlack.map((cell: Cell, index) => (
+                    <span
+                      key={index}
+                      className="inline-block transition-transform hover:scale-110"
+                    >
+                      {pieceRender(cell)}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-neutral-400 italic pt-2">
+                    Ninguna
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </Tabs>
     </div>
   );
 };

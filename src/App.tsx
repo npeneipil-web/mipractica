@@ -19,29 +19,139 @@ import { Calculator } from "./components/examples/calculator";
 import { Cat } from "./components/cat/index";
 import { Ajedrez } from "./components/ajedrez";
 
+import { Button, Switch, Sheet, Outlier } from "@outlier-spa/component";
+const { ThemeProvider } = Outlier;
+
 function App() {
   return (
-    <BrouserRouter>
-      <Home>
+    <ThemeProvider defaultTheme="light">
+      <BrouserRouter>
         <Routes>
-          <Route path="/" element={<>Bienvenido a mi práctica</>} />
-          <Route path="/employee" element={<PresentationLetter />} />
-          <Route path="/404" element={<ErrorPage />} />
-          <Route path="/input-form" element={<InputFormPage />} />
-          <Route path="/pokeapi" element={<PokeApiPage />} />
-          <Route path="/calculadora" element={<CalculadoraTable />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/lorempicsum" element={<LoremPicsumPage />} />
-          <Route path="/practica" element={<Presentations />} />
-          <Route path="/articulos" element={<Article />} />
-          <Route path="/calculator" element={<Calculator />} />
-          <Route path="/cat" element={<Cat />} />
-          <Route path="/ajedrez" element={<Ajedrez />} />
+          <Route
+            path="/"
+            element={
+              <>
+                <Home></Home>
+                <div>
+                  <Button variant="default">Destructive button</Button>
+                  <p>Bienvenido a mi práctica</p>
+                  <Switch>ejemplo</Switch>
+                </div>
+              </>
+            }
+          />
+          <Route
+            path="/employee"
+            element={
+              <>
+                <Home></Home> <PresentationLetter />
+              </>
+            }
+          />
+          <Route
+            path="/404"
+            element={
+              <>
+                <Home></Home> <ErrorPage />
+              </>
+            }
+          />
+          <Route
+            path="/input-form"
+            element={
+              <>
+                <Home></Home>
+                <InputFormPage />
+              </>
+            }
+          />
+          <Route
+            path="/pokeapi"
+            element={
+              <>
+                <Home></Home>
+                <PokeApiPage />
+              </>
+            }
+          />
+          <Route
+            path="/calculadora"
+            element={
+              <>
+                {" "}
+                <Home></Home>
+                <CalculadoraTable />
+              </>
+            }
+          />
+          <Route
+            path="/gallery"
+            element={
+              <>
+                <Home></Home>
+                <Gallery />
+              </>
+            }
+          />
+          <Route
+            path="/lorempicsum"
+            element={
+              <>
+                <Home></Home>
+                <LoremPicsumPage />
+              </>
+            }
+          />
+          <Route
+            path="/practica"
+            element={
+              <>
+                <Home></Home>
+                <Presentations />
+              </>
+            }
+          />
+          <Route
+            path="/articulos"
+            element={
+              <>
+                <Home></Home>
+                <Article />
+              </>
+            }
+          />
+          <Route
+            path="/calculator"
+            element={
+              <>
+                <Home></Home>
+                <Calculator />
+              </>
+            }
+          />
+          <Route
+            path="/cat"
+            element={
+              <>
+                <Home></Home>
+                <Cat />
+              </>
+            }
+          />
+          <Route
+            path="/ajedrez"
+            element={
+              <>
+                <Home></Home>
+                <Ajedrez />
+              </>
+            }
+          />
 
           <Route path="*" element={<Navigate to="/404" />} />
         </Routes>
-      </Home>
-    </BrouserRouter>
+      </BrouserRouter>
+    </ThemeProvider>
   );
 }
 
