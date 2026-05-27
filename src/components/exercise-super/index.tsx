@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Trash } from "lucide-react";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   Card,
@@ -15,7 +17,29 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Accordion,
+  AccordionTrigger,
+  AccordionContent,
+  AccordionItem,
+  RadioGroup,
+  RadioGroupItem,
+  AlertDialogTrigger,
+  AlertDialogCancel,
+  AlertDialogAction,
+  Progress,
+  Field,
+  FieldContent,
+  FieldLabel,
+  FieldDescription,
+  FieldTitle,
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+  Skeleton,
+  Toaster,
 } from "@outlier-spa/component";
+import { PokeApiPage } from "../pokeapi-page/index";
+import { Presentations } from "../practice/index";
 
 interface ArticleItem {
   id: number;
@@ -71,29 +95,28 @@ export const Article = () => {
 
   return (
     <>
-      <div className=" w-full font-mono flex justify-center  ">
-        <div className="w-150">
+      <div className=" w-full font-mono flex   flex-col  items-center">
+        <div className="w-150 ">
           <Card>
-            <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-col  items-center">
               <h1 className="text-center font-bold text-[20px] p-6 ">
                 Articulos de Supermercado
               </h1>
-
-              <Input
-                type="text"
-                placeholder="leche"
-                value={search}
-                onChange={(evento) => setSearch(evento.target.value)}
-              ></Input>
-
-              <Button className="mt-2" onClick={handleAddArticle}>
+              <div className="w-120">
+                <Input
+                  type="text"
+                  placeholder="leche"
+                  value={search}
+                  onChange={(evento) => setSearch(evento.target.value)}
+                ></Input>
+              </div>
+              <Button className="mt-5" onClick={handleAddArticle}>
                 Agregar
               </Button>
 
               <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    {/* renderiza los textos segun el error */}
                     <AlertDialogTitle>{alertMessage.title}</AlertDialogTitle>
                     <AlertDialogDescription>
                       {alertMessage.description}
@@ -109,8 +132,46 @@ export const Article = () => {
               <TableCaption>Último producto agregado {newArticle}</TableCaption>
               <TableBody>
                 <TableRow className="flex flex-col">
-                  {/* map se usa para recorrer el arreglo searchHistory y muestra cada elemento.*/}
                   <TableCell className="flex flex-col  gap-2 ml-10 mt-5 ">
+                    {searchHistory.some((article) => article.completed) && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="default"
+                            className="w-20 hover:text-red-500"
+                          >
+                            <Trash />
+                          </Button>
+                        </AlertDialogTrigger>
+
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Estas seguro?</AlertDialogTitle>
+                          </AlertDialogHeader>
+
+                          <AlertDialogFooter>
+                            <AlertDialogCancel variant="outline" size="default">
+                              Cancelar
+                            </AlertDialogCancel>
+
+                            <AlertDialogAction
+                              variant="default"
+                              size="default"
+                              onClick={() => {
+                                const filtered = searchHistory.filter(
+                                  (article) => !article.completed,
+                                );
+                                setSearchHistory(filtered);
+                              }}
+                            >
+                              Continuar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+
                     {searchHistory
                       //función de filtrado sería decidir qué elementos se muestran en pantalla
 
@@ -140,26 +201,17 @@ export const Article = () => {
                               setSearchHistory(updated);
                             }}
                           />
-                          <li
-                            className={
-                              item.completed ? "line-through text-gray-400" : ""
-                            }
-                          >
-                            {item.name}
-                          </li>
-
-                          <button
-                            onClick={() => {
-                              // Filtramos el array original para eliminar el elemento seleccionado
-                              const filtered = searchHistory.filter(
-                                (article) => article.id !== item.id,
-                              );
-                              setSearchHistory(filtered);
-                            }}
-                            className="border border-transparent bg-transparent  rounded-md p-1 text-xs hover:text-red-500 "
-                          >
-                            <Trash />
-                          </button>
+                          <div className=" h-7 w-30 ">
+                            <li
+                              className={
+                                item.completed
+                                  ? "line-through text-gray-400"
+                                  : ""
+                              }
+                            >
+                              {item.name}
+                            </li>
+                          </div>
                         </div>
                       ))}
                   </TableCell>
@@ -168,7 +220,145 @@ export const Article = () => {
             </Table>
           </Card>
         </div>
+        <div className="mt-20">
+          <Accordion
+            className="w-100"
+            collapsible
+            defaultValue="item-1"
+            type="single"
+          >
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Product Information</AccordionTrigger>
+              <AccordionContent className="flex flex-col gap-4 text-balance">
+                <p>
+                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                  Natus, at hic reiciendis accusantium consectetur nam ipsum
+                  aperiam debitis, est aliquid perferendis omnis inventore
+                  placeat modi quisquam et, repudiandae quas ea!
+                </p>
+                <p>
+                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                  Delectus explicabo tenetur odit amet laudantium minima natus
+                  nihil, accusamus in sequi.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Shipping Details</AccordionTrigger>
+              <AccordionContent className="flex flex-col gap-4 text-balance">
+                <p>Lorem ipsum dolor sit amet.</p>
+                <p>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic,
+                  quam!
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+              <AccordionTrigger>Return Policy</AccordionTrigger>
+              <AccordionContent className="flex flex-col gap-4 text-balance">
+                <p>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                  Itaque, dolores.
+                </p>
+                <p>
+                  Our hassle-free return process includes free return shipping
+                  and full refunds processed within 48 hours of receiving the
+                  returned item.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+        <div className="mt-10">
+          <Progress className="w-50" value={70} />
+        </div>
+        <div className="mt-10">
+          <RadioGroup defaultValue="plus" className="max-w-sm">
+            <FieldLabel htmlFor="plus-plan">
+              <Field orientation="horizontal">
+                <FieldContent>
+                  <FieldTitle>Plus</FieldTitle>
+                  <FieldDescription>
+                    Lorem ipsum dolor sit amet.
+                  </FieldDescription>
+                </FieldContent>
+                <RadioGroupItem value="plus" id="plus-plan" />
+              </Field>
+            </FieldLabel>
+            <FieldLabel htmlFor="pro-plan">
+              <Field orientation="horizontal">
+                <FieldContent>
+                  <FieldTitle>Pro</FieldTitle>
+                  <FieldDescription>Lorem ipsum dolor sit.</FieldDescription>
+                </FieldContent>
+                <RadioGroupItem value="pro" id="pro-plan" />
+              </Field>
+            </FieldLabel>
+            <FieldLabel htmlFor="enterprise-plan">
+              <Field orientation="horizontal">
+                <FieldContent>
+                  <FieldTitle>Enterprise</FieldTitle>
+                  <FieldDescription>
+                    Lorem ipsum dolor sit amet consectetur.
+                  </FieldDescription>
+                </FieldContent>
+                <RadioGroupItem value="enterprise" id="enterprise-plan" />
+              </Field>
+            </FieldLabel>
+          </RadioGroup>
+        </div>
+        <div className="w-100 flex gap-4 mt-10 justify-center">
+          <div>
+            <Button
+              onClick={() => {
+                toast("Evento creado", { description: "hoy" });
+              }}
+              variant="outline"
+            >
+              click
+            </Button>
+          </div>
+          <div className="flex items-center ">
+            <Toaster />
+            <Button onClick={function gG() {}}>Mensaje emergente</Button>
+          </div>
+        </div>
+
+        <div className="p-10">
+          <ResizablePanelGroup
+            className="border md:min-w-200 max-w-md rounded-lg "
+            direction="horizontal"
+          >
+            <ResizablePanel className="h-100" defaultSize={50}>
+              <div className="flex items-center justify-center ">
+                <Presentations></Presentations>
+              </div>
+            </ResizablePanel>
+            <ResizableHandle></ResizableHandle>
+            <ResizablePanel defaultSize={50}>
+              {" "}
+              <ResizablePanelGroup direction="vertical">
+                <ResizablePanel defaultSize={50}>
+                  <div className="flex justify-center items-center gap-4 mt-15">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-62" />
+                      <Skeleton className="h-4 w-50" />
+                    </div>
+                  </div>
+                </ResizablePanel>
+                <ResizableHandle></ResizableHandle>
+                <ResizablePanel defaultSize={50}>
+                  <div>
+                    <span>Three</span>
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
       </div>
+
       {/**    
        * Renderizado
        * <RenderChildren>

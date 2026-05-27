@@ -118,62 +118,64 @@ export const PokeApiPage = () => {
 
   return (
     <>
-      <div className=" ">
+      <div className="">
         <PokemonTable {...(pokemonData ?? nonePokemon)}></PokemonTable>
-        {/**revisa si se busco algo y si no encontró datos */}
 
-        <input
-          className="border p-2  rounded shadow-sm  "
-          type="text"
-          placeholder="Ej: ditto, pikachu..."
-          value={tempSearch}
-          onChange={(e) => setTempSearch(e.target.value)}
-        />
+        <div className="flex justify-center items-center   ">
+          <input
+            className=" border p-2  rounded shadow-sm relative bottom-120 left-17 "
+            type="text"
+            placeholder="Ej: ditto, pikachu..."
+            value={tempSearch}
+            onChange={(e) => setTempSearch(e.target.value)}
+          />
 
-        <button
-          className="bg-red-700 w-7 h-7 text-white text-center
-         rounded-full  bottom-39 left-38 shadow-md transition delay-150 duration-300 ease-in-out hover:-translate-0 hover:scale-110 hover:bg-red-600"
-          onClick={() => {
-            setTempSearch("");
-          }}
-        ></button>
-        <button
-          className=" transition delay-150 duration-300 ease-in-out hover:-translate-y-0 hover:scale-110 hover:bg-green-600 bg-green-700 w-12 h-12 text-white px-4 py-2 rounded-full relative bottom-38 left-41"
-          onClick={() => {
-            const trimmedSearch = tempSearch.trim();
-
-            if (!trimmedSearch) return;
-
-            setHasSearch(true);
-            setSearchPokemon(trimmedSearch);
-          }}
-        >
-          {/* <img src="https://cdn-icons-png.flaticon.com/512/4436/4436481.png" /> */}
-        </button>
-        {hasSearch && !pokemonData && (
-          <p className="text-gray-500 absolute top-70">
-            No se encontró el Pokémon.
-          </p>
-        )}
-        <div className="w-16 h-10  relative bottom-53 right-41">
           <button
-            className="bg-amber-400 w-7 relative top-2 transition delay-150 duration-100 ease-in-out hover:-translate-y-0 hover:scale-110"
-            onClick={handlePreviousPokemon}
-          >
-            <img
-              src="https://e7.pngegg.com/pngimages/693/235/png-clipart-green-arrow-computer-icons-left-arrow-angle-text-thumbnail.png"
-              alt=""
-            />
-          </button>
+            className="bg-red-700 w-7 h-7 text-white text-center
+         rounded-full  relative bottom-32 left-30 shadow-md transition delay-150 duration-300 ease-in-out hover:-translate-0 hover:scale-110 hover:bg-red-600"
+            onClick={() => {
+              setTempSearch("");
+            }}
+          ></button>
           <button
-            onClick={handleNextPokemon}
-            className="left-1 bg-amber-400 w-7 relative  top-2 transition delay-150 duration-100 ease-in-out hover:-translate-y-0 hover:scale-110"
+            className=" transition delay-150 duration-300 ease-in-out hover:-translate-y-0 hover:scale-110 hover:bg-green-600 bg-green-700 w-12 h-12 text-white px-4 py-2 rounded-full relative bottom-20 left-20"
+            onClick={() => {
+              const trimmedSearch = tempSearch.trim();
+
+              if (!trimmedSearch) return;
+
+              setHasSearch(true);
+              setSearchPokemon(trimmedSearch);
+            }}
           >
-            <img
-              src="https://e7.pngegg.com/pngimages/912/69/png-clipart-arrow-computer-icons-black-and-white-arrows-angle-rectangle-thumbnail.png"
-              alt=""
-            />
+            {/* <img src="https://cdn-icons-png.flaticon.com/512/4436/4436481.png" /> */}
           </button>
+
+          {hasSearch && !pokemonData && (
+            <p className="text-gray-500 absolute top-70">
+              No se encontró el Pokémon.
+            </p>
+          )}
+          <div className="w-16 h-10 right-76  relative bottom-53">
+            <button
+              className="bg-amber-400 w-7 relative top-30 transition delay-150 duration-100 ease-in-out hover:-translate-y-0 hover:scale-110"
+              onClick={handlePreviousPokemon}
+            >
+              <img
+                src="https://e7.pngegg.com/pngimages/693/235/png-clipart-green-arrow-computer-icons-left-arrow-angle-text-thumbnail.png"
+                alt=""
+              />
+            </button>
+            <button
+              onClick={handleNextPokemon}
+              className="left-1 bg-amber-400 w-7 relative  top-30 transition delay-150 duration-100 ease-in-out hover:-translate-y-0 hover:scale-110"
+            >
+              <img
+                src="https://e7.pngegg.com/pngimages/912/69/png-clipart-arrow-computer-icons-black-and-white-arrows-angle-rectangle-thumbnail.png"
+                alt=""
+              />
+            </button>
+          </div>
         </div>
       </div>
     </>
@@ -189,7 +191,7 @@ export const PokemonTable: React.FC<PokemonData> = ({
 }) => {
   return (
     <>
-      <div className="w-full flex  justify-center">
+      <div className="w-full flex  justify-center relative">
         <Card className="font-serif bg-red-500 p-4">
           <div className="flex flex-col justify-center">
             <div className="w-10 h-10 bg-blue-400  rounded-full"></div>
